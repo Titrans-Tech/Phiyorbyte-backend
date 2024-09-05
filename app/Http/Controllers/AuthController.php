@@ -25,6 +25,8 @@ class AuthController extends Controller
             'email' => $request['email'],
             'address' => $request['address'],
             'phone' => $request['phone'],
+            'ref_no' => substr(rand(0,time()),0, 9),
+            'status' => 'approved',
             'password' => Hash::make($request['password']),
         ]);
         $token = $user->createToken($user->email);
@@ -36,26 +38,6 @@ class AuthController extends Controller
     }
 
 
-    // public function loginuser(Request $request){
-    //     $request->validate([
-    //         'email' => 'required|email|exists:users',
-    //         'password' => 'required',
-    //     ]);
-    //     // dd($request->all());
-    //     $user = User::where('email', $request->email)->first();
-        
-    //     if (Hash::check($request->password, $user->password)) {
-    //         return [
-    //             'message' => 'the provided credentials are not correct'
-    //         ];
-    //     }
-
-    //     $token = $user->createToken($user->email);
-    //     return [
-    //         'user' => $user,
-    //         'token' => $token->plainTextToken,
-    //     ];
-    // }
     public function loginuser(Request $request)
     {
         $request->validate([

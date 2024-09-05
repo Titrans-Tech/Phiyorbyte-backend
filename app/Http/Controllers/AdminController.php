@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-
 class AdminController extends Controller
 {
     //
@@ -53,8 +52,9 @@ class AdminController extends Controller
     
     public function logoutadmin(Request $request)
     {
-        $request->admin()->currentAccessToken()->delete();
-
+        if ($request->user()) { 
+            $request->user()->tokens()->delete();
+        }
         return response()->json([
             'message' => 'Logged out successfully'
         ]);
