@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -59,6 +60,28 @@ class AuthController extends Controller
             'user' => $user,
             'access_token' => $token,
         ]);
+    }
+
+
+
+    public function changelogindetails(Request $request, $ref_no){
+       $user = User::where('ref_no', $ref_no)->first();
+        $request->validate([
+            'email' => ['required', 'email', 'unique:users'],
+            'password' => ['required', 'string', 'min:6'],
+            'password_confirmation' => 'required_with:password|same:password|min:6'
+        ]);
+
+        $user->email = $request->email;
+        $user->password = Hash::make($request['password']);
+        $user->update();
+       
+        $token = $user->createToken($user->email);
+        return response()->json([
+            'user' => $user,
+            'token' => $token->plainTextToken,
+        ], 200);
+       
     }
     
     public function logout(Request $request)

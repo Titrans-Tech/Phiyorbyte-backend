@@ -83,7 +83,21 @@ class UserController extends Controller
         return new UserResource($view_profile);
       
     }
-   
+
+
+    public function myprofile($ref_no)
+    {
+        $view_profile = User::where('ref_no', $ref_no)->first();
+        if (!$view_profile) {
+            return response()->json([
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        return new UserResource($view_profile);
+      
+    }
+    
     
 }
 

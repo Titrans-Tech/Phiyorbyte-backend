@@ -16,6 +16,7 @@ class ProductController extends Controller
        
         $request->validate([
             'product_name' => ['required'],
+            'name' => ['required'],
             'product_colors' => ['required'],
             'product_size' => ['required'],
             'categoryname' => ['required'],
@@ -40,6 +41,7 @@ class ProductController extends Controller
         $product = Product::create([
             'images1' => $imagePath,
             'product_name' => $request->product_name,
+            'name' => $request->name,
             
             'categoryname' => $request->categoryname,
             'product_colors' => $request->product_colors,
@@ -63,6 +65,7 @@ class ProductController extends Controller
         $edit_product = Product::findOrFail($id);
         $request->validate([
             'product_name' => ['nullable'],
+            'name' => ['nullable'],
             'product_colors' => ['nullable'],
             'product_size' => ['nullable'],
             'quantity' => ['nullable'],
@@ -71,7 +74,6 @@ class ProductController extends Controller
             'discount' => ['nullable'],
             'body' => ['nullable'],
             'categoryname' => ['nullable'],
-            
             'brand_name' => ['nullable'],
             'brand_name' => ['nullable'],
             'images1' => 'nullable|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -87,6 +89,7 @@ class ProductController extends Controller
         $edit_product->update([
            'images1' => $imagePath,
             'product_name' => $request->product_name,
+            'name' => $request->name,
             'product_colors' => $request->product_colors,
             'product_size' => $request->product_size,
             'quantity' => $request->quantity,
@@ -118,6 +121,71 @@ class ProductController extends Controller
         }
         return new ProductResource ($product);
     }
+
+    public function viewallcategories($categoryname){
+        $product = Product::where('categoryname', $categoryname)->get();
+        if (!$product) {
+            return response()->json([
+                'message' => 'product size not found'
+            ], 404);
+        }
+       return response()->json([
+            'product' => $product,
+        ], 200);
+    }
+
+
+    public function viewmencategory(){
+        $product = Product::where('categoryname', 'Men')->get();
+        if (!$product) {
+            return response()->json([
+                'message' => 'product size not found'
+            ], 404);
+        }
+       return response()->json([
+            'product' => $product,
+        ], 200);
+    }
+
+    public function subcategoryproducts(){
+        $product = Product::where('name', 'Sport')->get();
+        if (!$product) {
+            return response()->json([
+                'message' => 'product size not found'
+            ], 404);
+        }
+       return response()->json([
+            'product' => $product,
+        ], 200);
+    }
+
+    
+
+    public function womencategory(){
+        $product = Product::where('categoryname', 'Women')->get();
+        if (!$product) {
+            return response()->json([
+                'message' => 'product size not found'
+            ], 404);
+        }
+       return response()->json([
+            'product' => $product,
+        ], 200);
+    }
+
+    
+    public function newarrivals(){
+        $product = Product::where('categoryname', 'New Arrivals')->get();
+        if (!$product) {
+            return response()->json([
+                'message' => 'product size not found'
+            ], 404);
+        }
+       return response()->json([
+            'product' => $product,
+        ], 200);
+    }
+    
 
 
     public function destroy($id)

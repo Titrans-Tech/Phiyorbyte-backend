@@ -168,6 +168,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        Unicodeveloper\Paystack\PaystackServiceProvider::class,
     ])->toArray(),
 
     /*
@@ -182,6 +183,7 @@ return [
     */
 
     'aliases' => Facade::defaultAliases()->merge([
+        'Paystack' => Unicodeveloper\Paystack\Facades\Paystack::class,
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 

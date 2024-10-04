@@ -20,6 +20,7 @@ class Product extends Model
         'body',
         'product_colors',
         'product_size',
+        'name',
         'images1',
         'images2',
         'images3',
@@ -27,4 +28,15 @@ class Product extends Model
         'ref_no',
         'status',
     ];
+
+
+    public function favorites(){
+    
+        return $this->hasMany(Favorite::class);
+    }
+
+
+    public function carts(){
+    return $this->hasMany(Cart::class);
+    }
 }
