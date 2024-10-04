@@ -39,6 +39,7 @@ Route::post('/cart/couponapplication', [CartController::class, 'applyCoupon']);
 
 
 Route::post('/favorite/addfavorite/{id}', [FavoriteController::class, 'addProductTofavorite']);
+Route::post('/favorite/addcoupon', [FavoriteController::class, 'applyCoupon']);
 Route::post('/favorite/addcheckout', [FavoriteController::class, 'checkout']);
 
 Route::middleware(['auth:sanctum'])->group(function () {

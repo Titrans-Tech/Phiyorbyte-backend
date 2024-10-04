@@ -32,6 +32,7 @@ class FavoriteController extends Controller
             'product_colors' => $product->product_colors,
             'product_size' => $product->product_size,
             'amount' => $product->amount,
+            'discount' => $product->discount,
             'images1' => $product->images1,
            ]);
            $favorite[$id] = [
@@ -42,6 +43,7 @@ class FavoriteController extends Controller
             'product_name' => $product->product_name,
             'product_colors' => $product->product_colors,
             'product_size' => $product->product_size,
+            'discount' => $product->discount,
             'amount' => $product->amount,
             'images1' => $product->images1,
            ];
@@ -57,7 +59,7 @@ class FavoriteController extends Controller
         $total = $request->quantity * $product->amount,
         $subtotal = $request->quantity * $product->amount,
         $subtotal = $product->discount / $subtotal * 100,
-        $tot = $total - $subtotal + 500,
+        $tot = $total - $subtotal,
         $tot,
     ], 200);
 }
@@ -67,21 +69,24 @@ public function applyCoupon(Request $request){
         'user_id' => 'required',
         'coupon_code' => 'required',
     ]);
-    // dd($request);
+    
     $favorite = favorite::where('user_id', $request->user_id, $request->coupon_code)->firstOrFail();
+    
     if (!$favorite) {
         return response()->json([
            'message' => 'No user found' 
         ]);
     }
-   
+    // $product = Product::find($id);
     $coupon = Coupon::where('coupon_code', $request->coupon_code)
         ->where('valid_from', '<=', now())
         ->where('valid_to', '>=', now())
         ->first();
         
     if (!$coupon) {
-        return response()->json(['message' => 'Invalid or expired coupon'], 400);
+        return response()->json([
+            'message' => 'Invalid or expired coupon'
+        ], 400);
     }
 
     // Attach the coupon to the favorite
@@ -90,7 +95,14 @@ public function applyCoupon(Request $request){
 
     return response()->json([
         'message' => 'Coupon applied successfully', 
-        'favorite' => $coupon
+        'coupon' => $coupon,
+        'favorite' => $favorite,
+        // $favorite->quantity * $favorite->amount,
+        // $favorite->quantity * $favorite->amount,
+        // $subtotal = $favorite->quantity * $favorite->amount,
+        // $subtotal = $coupon->discount / $subtotal * 100,
+        // $tot = $total - $subtotal,
+        // $tot,
     ],200);
 }
 
@@ -99,20 +111,20 @@ public function checkout(Request $request)
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'payment_method' => 'required|string'
+            // 'payment_method' => 'required|string'
         ]);
 
         // Get the favorite
-        $favorite = favorite::where('user_id', $request->user_id)->firstOrFail();
-        
+        $favorite = favorite::with('items', 'coupon')->where('user_id', $request->user_id)->firstOrFail();
+        if (!$favorite) {
+            return response()->json(['message' => 'Cart not found'], 404);
+        }
         $total = 0;
-        
-        // Calculate the total amount
+
         foreach ($favorite->items as $item) {
             $total += $item->quantity * $item->product->price;
         }
 
-        // Apply discount if a coupon is attached
         if ($favorite->coupon) {
             if ($favorite->coupon->type === 'fixed') {
                 $total -= $favorite->coupon->discount;
@@ -131,7 +143,10 @@ public function checkout(Request $request)
         $favorite->items()->delete();
         $favorite->delete();
 
-        return response()->json(['message' => 'Checkout successful', 'total_paid' => $total], 200);
+        return response()->json([
+            'message' => 'Checkout successful', 
+            'total_paid' => $total
+        ], 200);
     }
 
 }
