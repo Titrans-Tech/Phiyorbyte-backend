@@ -115,14 +115,14 @@ public function checkout(Request $request)
         ]);
 
         // Get the favorite
-        $favorite = favorite::with('items', 'coupon')->where('user_id', $request->user_id)->firstOrFail();
+        $favorite = favorite::where('user_id', $request->user_id)->firstOrFail();
         if (!$favorite) {
             return response()->json(['message' => 'Cart not found'], 404);
         }
         $total = 0;
 
-        foreach ($favorite->items as $item) {
-            $total += $item->quantity * $item->product->price;
+        foreach ($favorite->quantity as $item) {
+            $total += $item->quantity * $item->favarite->amount;
         }
 
         if ($favorite->coupon) {

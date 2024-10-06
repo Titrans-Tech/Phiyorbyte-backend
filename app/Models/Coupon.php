@@ -25,4 +25,8 @@ class Coupon extends Model
         'usage_limit',
         'used_count',
     ];
+
+    public function carts(){
+        return $this->hasMany(Cart::class);
+        }
 }

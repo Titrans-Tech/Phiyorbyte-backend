@@ -15,12 +15,14 @@ return new class extends Migration
             $table->id();
             $table->string('user_id')->nullable();
             $table->string('product_id')->nullable();
+            $table->string('coupon_id')->nullable();
+            
             $table->string('product_name')->nullable();
             $table->decimal('amount', 8, 2)->nullable();
             $table->string('product_colors')->nullable();
             $table->string('product_size')->nullable();
 
-            $table->string('quantity')->nullable();
+            $table->text('quantity')->nullable();
             $table->string('images1')->nullable();
             $table->timestamps();
         });

@@ -9,7 +9,20 @@ class Cart extends Model
 {
     use HasFactory;
 
+    protected $casts = [
+        'quantity' => 'array', // It will automatically serialize/deserialize
+        'amount' => 'array', // It will automatically serialize/deserialize
+    ];
 
+    public function setquantityAttribute($value)
+{
+    $this->attributes['quantity'] = json_encode($value);
+}
+
+public function getquantityAttribute($value)
+{
+    return json_decode($value, true);
+}
     protected $fillable = [
         'user_id',
         'product_id',
@@ -26,7 +39,10 @@ class Cart extends Model
     return $this->belongsTo(Product::class);
     }
 
-
+    public function coupon()
+    {
+    return $this->belongsTo(Coupon::class);
+    }
     public function user(){
     return $this->belongsTo(User::class);
     }

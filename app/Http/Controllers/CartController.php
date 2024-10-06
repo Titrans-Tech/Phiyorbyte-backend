@@ -60,13 +60,14 @@ class CartController extends Controller
   
         'message' => 'Product added to cart', 
         'cart_item' => $product,
+        'discount' => $product->discount,
         'amount' => $request->quantity * $product->amount,
         'quantity' => $request->quantity,
-        $total = $request->quantity * $product->amount,
-        $subtotal = $request->quantity * $product->amount,
-        $subtotal = $product->discount / $subtotal * 100,
-        $tot = $total - $subtotal + 500,
-        $tot,
+        // $total = $request->quantity * $product->amount,
+        // $subtotal = $request->quantity * $product->amount,
+        // $subtotal = $product->discount - $subtotal,
+        // $tot = $total - $subtotal,
+        //  $total,
     ], 200);
 }
     
@@ -77,6 +78,7 @@ public function applyCoupon(Request $request){
     ]);
     // dd($request);
     $cart = Cart::where('user_id', $request->user_id, $request->coupon_code)->firstOrFail();
+    
     if (!$cart) {
         return response()->json([
            'message' => 'No user found' 
@@ -89,16 +91,27 @@ public function applyCoupon(Request $request){
         ->first();
         
     if (!$coupon) {
-        return response()->json(['message' => 'Invalid or expired coupon'], 400);
+        return response()->json([
+            'message' => 'Invalid or expired coupon'
+        ], 400);
     }
 
     // Attach the coupon to the cart
-    // $coupon->coupon_id = $coupon->id;
-    $coupon->save();
-
+    $cart->coupon_id = $coupon->id;
+    $cart->save();
+    $subtotal = 0;
+    $total = 0;
+    $total_paid = 0;
     return response()->json([
         'message' => 'Coupon applied successfully', 
-        'cart' => $coupon
+        'cart' => $cart,
+        'coupon' => $coupon,
+
+        'subtotal' => $subtotal =  $cart->quantity * $cart->amount,
+        'total' => $total = $coupon->discount * $cart->quantity,
+        
+        'total_paid' =>$total_paid = $subtotal - $total,
+        $total_paid,
     ],200);
 }
 
@@ -107,39 +120,73 @@ public function checkout(Request $request)
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'payment_method' => 'required|string'
+            // 'payment_method' => 'required|string'
         ]);
 
         // Get the cart
         $cart = Cart::where('user_id', $request->user_id)->firstOrFail();
-        
+       
+        $subtotal = 0;
         $total = 0;
         
-        // Calculate the total amount
-        foreach ($cart->items as $item) {
-            $total += $item->quantity * $item->product->price;
-        }
+        if ($cart) {
+            $cart = [
+                // $cart->quantity * $cart->amount
+                $subtotal += $cart->quantity * $cart->amount,
+                $total - $cart->coupon->discount,
+                $subtotal - $total,
+            
+            ]; // Wrap the single record in an array if necessary
 
+            // return response()->json([
+            //     'cart' => $cart,
+                
+            // ]); 
+           
+            // foreach ($cart->quantity as $quanti) {
+            //     $total += $quanti->quantity * $quanti->amount;
+            // }
+            // $total;
+        }
+                
+        
         // Apply discount if a coupon is attached
-        if ($cart->coupon) {
-            if ($cart->coupon->type === 'fixed') {
-                $total -= $cart->coupon->discount;
-            } elseif ($cart->coupon->type === 'percent') {
-                $total -= ($total * ($cart->coupon->discount / 100));
-            }
+        // if ($cart) {
+            
+        //     $total -= $cart->discount;
+            
 
-            // Update the coupon usage count
-            $cart->coupon->increment('used_count');
-        }
+        //     // Update the coupon usage count
+        //     $cart->coupon->increment('used_count');
+        // }
 
         // Process the payment here (e.g., using Stripe, PayPal, etc.)
         // After successful payment:
         
         // Clear the cart
-        $cart->items()->delete();
-        $cart->delete();
+        // $cart->cart()->delete();
+        // $cart->delete();
 
-        return response()->json(['message' => 'Checkout successful', 'total_paid' => $total], 200);
+        return response()->json([
+            'message' => 'Checkout successful',
+             'subtotal' => $subtotal,
+             'total' => $total
+            ], 200);
     }
 
+
+    public function remove($id)
+    {
+        $cart = session()->get('cart');
+
+        if(isset($cart[$id])) {
+            unset($cart[$id]);
+            session()->put('cart', $cart);
+            $cart = Cart::where('id', $id)->delete();
+        }
+
+        return response()->json([
+            'message', 'Product removed from cart.'
+        ], 200);
+    }
 }

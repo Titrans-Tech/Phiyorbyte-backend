@@ -36,6 +36,8 @@ Route::get('category/newarrivalcategory',[ProductController::class,'newarrivals'
 Route::get('/product/subcategory/{name}', [ProductController::class, 'subcategoryproducts']);
 Route::post('/cart/add/{id}', [CartController::class, 'addProductToCart']);
 Route::post('/cart/couponapplication', [CartController::class, 'applyCoupon']);
+Route::get('/cart/deleteartproduct/{id}', [CartController::class, 'remove']);
+Route::post('/cart/addcheckout', [CartController::class, 'checkout']);
 
 
 Route::post('/favorite/addfavorite/{id}', [FavoriteController::class, 'addProductTofavorite']);
@@ -102,14 +104,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::patch('/users/users/{ref_no}', [UserController::class, 'update']);
   Route::delete('/users/deleteuser/{ref_no}', [UserController::class, 'destroy']);
   Route::get('/users/profile/{ref_no}', [UserController::class, 'profile']);
-  Route::get('/users/profile/{ref_no}', [UserController::class, 'profile']);
   
-  Route::post('/users/productsize/createsizes', [ProductsizeController::class, 'createsize']);
-  Route::put('/users/productsize/editsize/{id}', [ProductsizeController::class, 'update']);
-  Route::get('/users/productsize/deletesize/{id}', [ProductsizeController::class, 'destroysize']);
-  Route::get('/users/productsize/viewsizes', [ProductsizeController::class, 'viewsize']);
-  
-  
+
   Route::post('/users/products/createproducts', [ProductController::class, 'createproduct']);
   Route::put('/users/products/editproducts/{id}', [ProductController::class, 'updateproduct']);
   Route::get('/users/products/viewproducts', [ProductController::class, 'viewproduct']);
