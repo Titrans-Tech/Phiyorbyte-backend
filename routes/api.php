@@ -8,6 +8,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductcolorController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductsizeController;
@@ -28,6 +29,22 @@ use App\Http\Controllers\UserController;
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
 // });
+
+
+Route::get('/payment', [OrderController::class, 'showPaymentForm'])->name('payment.form');
+Route::post('/payment/process', [OrderController::class, 'processPayment'])->name('payment.process');
+Route::get('/payment/callback', [OrderController::class, 'paymentCallback'])->name('payment.callback');
+
+Route::get('/payment/success', function () {
+    return 'Payment successful';
+})->name('payment.success');
+
+Route::get('/payment/failed', function () {
+    return 'Payment failed';
+})->name('payment.failed');
+
+
+
 Route::get('viewcategories/{categoryname}',[ProductController::class,'viewallcategories']);
 Route::get('category/mencategory',[ProductController::class,'viewmencategory']);
 Route::get('category/womencategory',[ProductController::class,'womencategory']);
@@ -38,6 +55,7 @@ Route::post('/cart/add/{id}', [CartController::class, 'addProductToCart']);
 Route::post('/cart/couponapplication', [CartController::class, 'applyCoupon']);
 Route::get('/cart/deleteartproduct/{id}', [CartController::class, 'remove']);
 Route::post('/cart/addcheckout', [CartController::class, 'checkout']);
+Route::get('/thankyou', [OrderController::class, 'thankyou']);
 
 
 Route::post('/favorite/addfavorite/{id}', [FavoriteController::class, 'addProductTofavorite']);
@@ -49,6 +67,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/admin/coupon/deletecoupon/{id}', [CouponController::class, 'destroy']);
     Route::post('/admin/coupon/createcouponcode', [CouponController::class, 'store']);
     Route::get('/admin/coupon/viewcoupon', [CouponController::class, 'viewcoupon']);
+    Route::get('/admin/orders/vieworders', [OrderController::class, 'vieworder']);
     
     Route::post('/admin/subcategory/createsubcategory', [SubcategoryController::class, 'store']);
     Route::put('/admin/subcategory/editsubcategory/{id}', [SubcategoryController::class, 'update']);
@@ -106,13 +125,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::get('/users/profile/{ref_no}', [UserController::class, 'profile']);
   
 
-  Route::post('/users/products/createproducts', [ProductController::class, 'createproduct']);
-  Route::put('/users/products/editproducts/{id}', [ProductController::class, 'updateproduct']);
-  Route::get('/users/products/viewproducts', [ProductController::class, 'viewproduct']);
-  Route::get('/users/products/viewsingleproduct/{ref_no}', [ProductController::class, 'show']);
-  Route::get('/users/products/deleteproduct/{ref_no}', [ProductController::class, 'destroy']);
-  Route::get('/users/products/markavailable/{id}', [ProductController::class, 'productavailable']);
-  Route::get('/users/products/markunavailable/{id}', [ProductController::class, 'productunavailable']);
+  Route::get('/users/order/viewmyorders', [OrderController::class, 'viewmyorder']);
   
  
  

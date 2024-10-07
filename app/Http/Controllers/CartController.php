@@ -4,11 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Cart;
 use App\Models\Coupon;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use App\Models\Sale;
+use Illuminate\Http\Request;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+use Illuminate\Support\Facades\Auth;
 
 
 class CartController extends Controller
@@ -111,68 +116,109 @@ public function applyCoupon(Request $request){
         'total' => $total = $coupon->discount * $cart->quantity,
         
         'total_paid' =>$total_paid = $subtotal - $total,
-        $total_paid,
+        'amount' =>$total_paid,
     ],200);
 }
 
    
-public function checkout(Request $request)
-    {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            // 'payment_method' => 'required|string'
-        ]);
+public function checkout(Request $request){
+    $reference = substr(rand(0,time()),0, 9);
+    $request->validate([
+        'user_id' => 'required',
+        'email' => 'required',
+        'phone' => 'required',
+        'first_name' => 'required',
+        'last_name' => 'required',
+        'product_id' => 'required',
+        'amount' => 'required',
+        'quantity' => 'required',
+        'first_name' => 'required',
+        'last_name' => 'required',
+    ]);
+    try {
+        // Initialize transaction on Paystack with split details
+        $response = Http::withToken('sk_test_2480c735552c0c451064507cb47a75d736c5c969')
+            ->post('https://api.paystack.co/transaction/initialize', [
+                'email' => $request->email, 
+                'amount' => $request->amount, 
+                'reference' => $reference,
+                'user_id' => $request->user_id,
+                'first_name' => $request->first_name,
+                'last_name' => $request->lname,
+                'user_id' => $request->user_id,
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'product_id' => $request->product_id,
+                'phone' => $request->phone,
+                'callback_url' => route('payment.callback'),  // URL to redirect after payment
+                'split' => [
+                    'type' => 'percentage', // or 'flat' if you want a fixed amount
+                    'subaccounts' => [
+                        [
+                            'subaccount' => 'ACCT_ydm5cjexrm0d88c', 
+                            'share' => 50  
+                        ],
+                        [
+                            'subaccount' => 'ACCT_whkl6chr1tbvy8j',
+                            'share' => 50  
+                        ]
+                    ]
+                ]
+            ]);
 
-        // Get the cart
-        $cart = Cart::where('user_id', $request->user_id)->firstOrFail();
-       
-        $subtotal = 0;
-        $total = 0;
-        
-        if ($cart) {
-            $cart = [
-                // $cart->quantity * $cart->amount
-                $subtotal += $cart->quantity * $cart->amount,
-                $total - $cart->coupon->discount,
-                $subtotal - $total,
-            
-            ]; // Wrap the single record in an array if necessary
+            //$result = json_decode($response->getBody()->getContents(), true);
+   
 
             // return response()->json([
-            //     'cart' => $cart,
-                
-            // ]); 
-           
-            // foreach ($cart->quantity as $quanti) {
-            //     $total += $quanti->quantity * $quanti->amount;
-            // }
-            // $total;
-        }
-                
-        
-        // Apply discount if a coupon is attached
-        // if ($cart) {
-            
-        //     $total -= $cart->discount;
-            
+            //     'data' => $result,
+            // ]);
 
-        //     // Update the coupon usage count
-        //     $cart->coupon->increment('used_count');
-        // }
-
-        // Process the payment here (e.g., using Stripe, PayPal, etc.)
-        // After successful payment:
-        
-        // Clear the cart
-        // $cart->cart()->delete();
-        // $cart->delete();
-
+        $result = $response->json();
+        $order = Order::create([
+            'quantity' => $request->quantity,
+            'ref_no' => substr(rand(0,time()),0, 9),
+            'amount' => $request->amount,
+            'email' => $request->email,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'phone' => $request->phone,
+            'user_id' => $request->user_id,
+            'product_id' => $request->product_id,
+            'first_name' => $request->fname,
+            'phone' => $request->phone,
+            'last_name' => $request->lname,
+            'reference' => $reference,
+            'productname' => $request->productname,
+            // 'currency' => $request->currency,
+            'currency' => 'NGN',
+            // 'channels' => $request->channels,
+            'images1' => $request->images1,
+            'images2' => $request->images2,
+            'images3' => $request->images3,
+            'images4' => $request->images4,
+            'images5' => $request->images5,
+            'status' => 'pending',
+        ]);
+        // $result = json_decode($response->getBody()->getContents(), true);
         return response()->json([
-            'message' => 'Checkout successful',
-             'subtotal' => $subtotal,
-             'total' => $total
-            ], 200);
+            'order' => $order,
+            'result' => $result
+        ]);
+
+        // Check if the payment initialization was successful
+        if ($order['status']) {
+            // Redirect to Paystack payment page
+            return redirect($order['data']['authorization_url']);
+        } else {
+            return back()->with('error', 'Failed to initialize payment. Please try again.');
+        }
+    } 
+    catch (RequestException $e) {
+        throw $e; // or handle the error as needed
+        // return back()->with('error', 'An error occurred. Please try again.');
     }
+}        
+
 
 
     public function remove($id)

@@ -40,6 +40,10 @@ class Product extends Model
     return $this->hasMany(Cart::class);
     }
 
+    public function orders(){
+        return $this->hasMany(Order::class);
+    }
+
     // public function coupons(){
     //     return $this->hasMany(Coupon::class);
     //     }
