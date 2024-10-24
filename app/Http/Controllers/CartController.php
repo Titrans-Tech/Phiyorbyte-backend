@@ -115,7 +115,7 @@ public function applyCoupon(Request $request){
         'subtotal' => $subtotal =  $cart->quantity * $cart->amount,
         'total' => $total = $coupon->discount * $cart->quantity,
         
-        'total_paid' =>$total_paid = $subtotal - $total,
+        'total_paid' =>$total_paid = $subtotal / $total * 100,
         'amount' =>$total_paid,
     ],200);
 }
@@ -166,12 +166,12 @@ public function checkout(Request $request){
                 ]
             ]);
 
-            //$result = json_decode($response->getBody()->getContents(), true);
+            $result = json_decode($response->getBody()->getContents(), true);
    
 
-            // return response()->json([
-            //     'data' => $result,
-            // ]);
+            return response()->json([
+                'data' => $result,
+            ]);
 
         $result = $response->json();
         $order = Order::create([
@@ -198,6 +198,17 @@ public function checkout(Request $request){
             'images4' => $request->images4,
             'images5' => $request->images5,
             'status' => 'pending',
+
+
+            //DELEVERY DETAIL
+            'delivery_address' => $request->delivery_address,
+            'delivery_phone' => $request->delivery_phone,
+            'delivery_state' => $request->delivery_state,
+            'delivery_city' => $request->delivery_city,
+            'pick_station' => $request->pick_station,
+            'orderstatus' => 'Ongoing',
+
+            
         ]);
         // $result = json_decode($response->getBody()->getContents(), true);
         return response()->json([
@@ -214,8 +225,7 @@ public function checkout(Request $request){
         }
     } 
     catch (RequestException $e) {
-        throw $e; // or handle the error as needed
-        // return back()->with('error', 'An error occurred. Please try again.');
+        throw $e; 
     }
 }        
 

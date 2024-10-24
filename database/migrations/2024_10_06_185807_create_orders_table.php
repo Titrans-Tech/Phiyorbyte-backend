@@ -77,6 +77,12 @@ return new class extends Migration
             $table->string('reusable')->nullable();
             $table->string('reusable')->nullable();
             
+            
+            $table->string('delivery_address')->nullable();
+            $table->string('delivery_phone')->nullable();
+            $table->string('delivery_state')->nullable();
+            $table->string('delivery_city')->nullable();
+            $table->string('pick_station')->nullable();
             $table->timestamps();
         });
     }

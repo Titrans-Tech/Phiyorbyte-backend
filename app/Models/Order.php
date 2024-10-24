@@ -20,7 +20,6 @@ class Order extends Model
         'phone', 
         
         'product_id', 
-   
         'franchise_id', 
         'reference', 
         'productname', 
@@ -71,6 +70,14 @@ class Order extends Model
         'integration',
         'split_fees',
         'split_id',
+        'delivery_address',
+        'delivery_phone',
+        'delivery_state',
+        'delivery_city',
+        'pick_station',
+        'oderstatus',
+
+       
         
     ];
 

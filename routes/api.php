@@ -14,6 +14,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductsizeController;
 use App\Http\Controllers\SubcategoryController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PasswordResetController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,6 +31,9 @@ use App\Http\Controllers\UserController;
 //     return $request->user();
 // });
 
+Route::post('password/email', [PasswordResetController::class, 'sendResetLinkEmail']);
+Route::post('password/reset', [PasswordResetController::class, 'reset']);
+
 
 Route::get('/payment', [OrderController::class, 'showPaymentForm'])->name('payment.form');
 Route::post('/payment/process', [OrderController::class, 'processPayment'])->name('payment.process');
@@ -42,7 +46,8 @@ Route::get('/payment/success', function () {
 Route::get('/payment/failed', function () {
     return 'Payment failed';
 })->name('payment.failed');
-
+Route::post('password/email', [PasswordResetController::class, 'sendResetLinkEmail']);
+Route::post('password/reset', [PasswordResetController::class, 'reset']);
 
 
 Route::get('viewcategories/{categoryname}',[ProductController::class,'viewallcategories']);
@@ -78,7 +83,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::patch('/admin/users/{ref_no}', [UserController::class, 'update']);
     Route::delete('/admin/deleteuser/{ref_no}', [UserController::class, 'destroy']);
     Route::get('/admin/profile/{ref_no}', [UserController::class, 'profile']);
-    Route::get('/admin/profile/{ref_no}', [UserController::class, 'profile']);
+    Route::put('/admin/users/changepassword/{ref_no}', [UserController::class, 'updatepassword']);
     
     Route::post('/admin/productsize/createsizes', [ProductsizeController::class, 'createsize']);
     Route::put('/admin/productsize/editsize/{id}', [ProductsizeController::class, 'update']);

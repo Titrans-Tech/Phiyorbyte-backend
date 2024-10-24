@@ -17,7 +17,7 @@ class AuthController extends Controller
             'address' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'unique:users'],
             'email' => ['required', 'email', 'unique:users'],
-            'password' => ['required', 'string', 'min:6'],
+            'password' => ['required', 'string', 'min:3'],
             'password_confirmation' => 'required_with:password|same:password|min:6'
         ]);
 
@@ -68,7 +68,7 @@ class AuthController extends Controller
        $user = User::where('ref_no', $ref_no)->first();
         $request->validate([
             'email' => ['required', 'email', 'unique:users'],
-            'password' => ['required', 'string', 'min:6'],
+            'password' => ['required', 'string', 'min:3'],
             'password_confirmation' => 'required_with:password|same:password|min:6'
         ]);
 

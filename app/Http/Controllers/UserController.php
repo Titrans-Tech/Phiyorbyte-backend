@@ -6,6 +6,8 @@ use App\Http\Resources\UserCollection;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Hash;
+
 class UserController extends Controller
 {
     //
@@ -97,6 +99,25 @@ class UserController extends Controller
         return new UserResource($view_profile);
       
     }
+
+    
+    public function updatepassword(Request $request, $ref_no){
+        $user = User::where('ref_no', $ref_no)->first();
+         $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string', 'min:3'],
+         ]);
+ 
+         $user->email = $request->email;
+         $user->password = Hash::make($request['password']);
+         $user->update();
+         $token = $user->createToken($user->email);
+         return response()->json([
+             'user' => $user,
+             'token' => $token->plainTextToken,
+         ], 200);
+        
+     }
     
     
 }
