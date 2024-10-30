@@ -6,6 +6,7 @@ use App\Models\Coupon;
 use App\Models\Favorite;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class FavoriteController extends Controller
 {
@@ -147,6 +148,14 @@ public function checkout(Request $request)
             'message' => 'Checkout successful', 
             'total_paid' => $total
         ], 200);
+    }
+
+
+    public function myfavourites(){
+        $view_myfavourites = Favorite::where('user_id', auth()->user()->id)->get();
+        return response()->json([
+            'favourite' => $view_myfavourites,
+        ]);
     }
 
 }

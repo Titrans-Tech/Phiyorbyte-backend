@@ -220,4 +220,11 @@ class ProductController extends Controller
             'message' => 'You have set the product Unavailable'
         ], 200);
     }
+
+    function productdetail($ref_no){
+        $product_details = Product::where('ref_no', $ref_no)->first();
+        return response()->json([
+            'product' => $product_details
+        ], 200);
+    }
 }

@@ -67,9 +67,9 @@ class AuthController extends Controller
     public function changelogindetails(Request $request, $ref_no){
        $user = User::where('ref_no', $ref_no)->first();
         $request->validate([
-            'email' => ['required', 'email', 'unique:users'],
+            'email' => ['required'],
             'password' => ['required', 'string', 'min:3'],
-            'password_confirmation' => 'required_with:password|same:password|min:6'
+            'password_confirmation' => 'required_with:password|same:password|min:3'
         ]);
 
         $user->email = $request->email;

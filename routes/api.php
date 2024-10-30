@@ -55,6 +55,8 @@ Route::get('category/mencategory',[ProductController::class,'viewmencategory']);
 Route::get('category/womencategory',[ProductController::class,'womencategory']);
 Route::get('category/newarrivalcategory',[ProductController::class,'newarrivals']);
 
+Route::get('/product/productdetails/{ref_no}', [ProductController::class, 'productdetail']);
+
 Route::get('/product/subcategory/{name}', [ProductController::class, 'subcategoryproducts']);
 Route::post('/cart/add/{id}', [CartController::class, 'addProductToCart']);
 Route::post('/cart/couponapplication', [CartController::class, 'applyCoupon']);
@@ -128,10 +130,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::patch('/users/users/{ref_no}', [UserController::class, 'update']);
   Route::delete('/users/deleteuser/{ref_no}', [UserController::class, 'destroy']);
   Route::get('/users/profile/{ref_no}', [UserController::class, 'profile']);
+  Route::get('/favorite/myfavourite', [FavoriteController::class, 'myfavourites']);
   
-
+  // myordersproduct obodobright0@gmail.com
   Route::get('/users/order/viewmyorders', [OrderController::class, 'viewmyorder']);
-  
+  Route::get('/users/cart/myordersproduct', [OrderController::class, 'myordersproducts']);
+  Route::get('/users/cart/orderdetails/{id}', [OrderController::class, 'ordermydetail']);
  
  
 });

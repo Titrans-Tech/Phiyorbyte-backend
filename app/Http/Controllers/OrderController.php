@@ -132,10 +132,23 @@ class OrderController extends Controller
     return response()->json([
         'order' => $view_oders
  ]);
-    
+ }
+
+ public function myordersproducts(){
+    $view_myproducts = Order::where('user_id', auth()->user()->id)->latest()->get();
+    return response()->json([
+        'order' => $view_myproducts
+ ]);
+ }
+
+ public function ordermydetail($id){
+    $view_myordetails = Order::find($id);
+    return response()->json([
+        'order' => $view_myordetails
+ ]);
  }
  
-
-
+ 
+ 
  
 }
