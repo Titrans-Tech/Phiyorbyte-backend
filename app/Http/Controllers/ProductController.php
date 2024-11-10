@@ -20,26 +20,27 @@ class ProductController extends Controller
             'product_colors' => ['required'],
             'product_size' => ['required'],
             'categoryname' => ['required'],
-            
             'quantity' => ['required'],
             'amount' => ['required'],
             'purchase_price' => ['required'],
             'discount' => ['required'],
             'body' => ['required'],
             'brand_name' => ['required'],
-            'brand_name' => ['required'],
-            'images1' => 'required|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'images1' => 'required|mimes:jpeg,png,jpg,gif,svg',
         ]);
-        // Handle the image upload
-        if ($request->hasFile('images1')) {
-            // Store the image in the 'public/products' directory
-            $imagePath = $request->file('images1')->store('products', 'public');
-        } else {
-            $imagePath = 'noimage.jpg'; // No image uploaded
+       
+
+        if ($request->hasFile('images1')){
+
+            $file = $request['images1'];
+            $filename = 'SimonJonah-' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $request->file('images1')->storeAs('resourceimages1', $filename);
+
         }
+        // $add_blog['images1'] = $path;
 
         $product = Product::create([
-            'images1' => $imagePath,
+            'images1' => $path,
             'product_name' => $request->product_name,
             'name' => $request->name,
             
@@ -55,8 +56,7 @@ class ProductController extends Controller
             'ref_no' => substr(rand(0,time()),0, 9),
 
         ]);
-        // return redirect()->route('admin/products/addsecondproductphpto', ['ref_no' =>$product->ref_no]);
-        //return redirect()->route('admin/products/secondpicture/'.$product->ref_no);
+       
         return [
             'product' => $product,
         ];
@@ -76,18 +76,18 @@ class ProductController extends Controller
             'categoryname' => ['nullable'],
             'brand_name' => ['nullable'],
             'brand_name' => ['nullable'],
-            'images1' => 'nullable|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'images1' => 'nullable|mimes:jpeg,png,jpg,gif,svg',
         ]);
-       if ($request->hasFile('images1')) {
-        if ($edit_product->images1) {
-            Storage::disk('public')->delete($edit_product->images1);
-        }
-            $imagePath = $request->file('images1')->store('edit_products', 'public');
-        } else {
-            $imagePath = $edit_product->images1; // Keep the existing image if no new image is uploaded
+        if ($request->hasFile('images1')){
+
+            $file = $request['images1'];
+            $filename = 'SimonJonah-' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $request->file('images1')->storeAs('resourceimages1', $filename);
+            
+            $edit_product['images1'] = $path;
+
         }
         $edit_product->update([
-           'images1' => $imagePath,
             'product_name' => $request->product_name,
             'name' => $request->name,
             'product_colors' => $request->product_colors,
@@ -142,22 +142,25 @@ class ProductController extends Controller
                 'message' => 'product size not found'
             ], 404);
         }
-       return response()->json([
-            'product' => $product,
-        ], 200);
+        
+        return new ProductCollection ($product);
+
+    //    return response()->json([
+    //         'product' => $product,
+    //         'images1' => asset($product->images1),
+    //     ], 200);
     }
 
-    public function subcategoryproducts(){
-        $product = Product::where('name', 'Sport')->get();
-        if (!$product) {
-            return response()->json([
-                'message' => 'product size not found'
-            ], 404);
-        }
-       return response()->json([
-            'product' => $product,
-        ], 200);
-    }
+    // public function subcategoryproducts(){
+    //     $product = Product::where('name', 'Sport')->get();
+    //     if (!$product) {
+    //         return response()->json([
+    //             'message' => 'product size not found'
+    //         ], 404);
+    //     }
+    //     return new ProductCollection ($product);
+
+    // }
 
     
 
@@ -168,22 +171,20 @@ class ProductController extends Controller
                 'message' => 'product size not found'
             ], 404);
         }
-       return response()->json([
-            'product' => $product,
-        ], 200);
+        return new ProductCollection ($product);
+
     }
 
     
     public function newarrivals(){
-        $product = Product::where('categoryname', 'New Arrivals')->get();
+        $product = Product::latest()->get();
         if (!$product) {
             return response()->json([
                 'message' => 'product size not found'
             ], 404);
         }
-       return response()->json([
-            'product' => $product,
-        ], 200);
+        return new ProductCollection ($product);
+
     }
     
 
@@ -204,16 +205,28 @@ class ProductController extends Controller
 
 
     public function productavailable($id){
-        $available_product = Product::findOrFail($id);
-        $available_product->status = 'Available';
-        $available_product->save();
+        $available_product = Product::find($id);
+        if ($available_product) {
+            return response()->json([
+                'message' => 'You have set the product Available'
+            ], 200);
+            $available_product->status = 'Available';
+            $available_product->save();
+        }else
         return response()->json([
-            'message' => 'You have set the product Available'
-        ], 200);
+            'message' => 'product size not found'
+        ], 404);
+        
+        
     }
 
     public function productunavailable($id){
-        $unavailable_product = Product::findOrFail($id);
+        $unavailable_product = Product::find($id);
+        if (!$unavailable_product) {
+            return response()->json([
+                'message' => 'product size not found'
+            ], 404);
+        }
         $unavailable_product->status = 'Unavailable';
         $unavailable_product->save();
         return response()->json([

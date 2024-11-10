@@ -44,7 +44,9 @@ class Product extends Model
         return $this->hasMany(Order::class);
     }
 
-    // public function coupons(){
-    //     return $this->hasMany(Coupon::class);
-    //     }
+    // In Product Model or API Controller
+        public function getImageUrlAttribute()
+        {
+            return asset($this->images1);
+        }
 }

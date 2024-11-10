@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ProductCollection;
+use App\Models\Product;
 use App\Models\Subcategory;
 use Illuminate\Http\Request;
 
@@ -10,9 +12,11 @@ class SubcategoryController extends Controller
     public function store(Request $request){
         $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:subcategories'],
+            'categoryname' => ['required', 'string', 'max:255'],
         ]);
 
         $addsubcategory = Subcategory::create([
+            'categoryname' => $request['categoryname'],
             'name' => $request['name'],
             'ref_no' => substr(rand(0,time()),0, 9),
         ]);
@@ -48,5 +52,45 @@ class SubcategoryController extends Controller
         ], 200);
     }
 
+    public function show(){
+        $viewall_subs = Subcategory::all();
+        return response()->json([
+            'subcategory' => $viewall_subs
+        ]);
+    }
 
+
+    public function viewmensubcategory(){
+        $viewall_subcatoriesfor_mens = Subcategory::where('categoryname', 'Men')->latest()->get();
+        return response()->json([
+            'subcategory' => $viewall_subcatoriesfor_mens
+        ]);
+    }
+
+    public function viewwomensubcategory(){
+        $viewall_subcatoriesfor_womens = Subcategory::where('categoryname', 'Women')->latest()->get();
+        return response()->json([
+            'subcategory' => $viewall_subcatoriesfor_womens
+        ]);
+    }
+
+    public function subcategoryproducts($name){
+        $productsubscate = Subcategory::where('name', $name)->first();
+        if (!$productsubscate) {
+            return response()->json([
+                'message' => 'product size not found'
+            ], 404);
+        }
+        $product = Product::where('name', $name)->get();
+
+        
+        
+       
+        return new ProductCollection ($product);
+
+    }
+
+
+
+    
 }

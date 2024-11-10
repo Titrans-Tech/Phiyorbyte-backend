@@ -54,10 +54,12 @@ Route::get('viewcategories/{categoryname}',[ProductController::class,'viewallcat
 Route::get('category/mencategory',[ProductController::class,'viewmencategory']);
 Route::get('category/womencategory',[ProductController::class,'womencategory']);
 Route::get('category/newarrivalcategory',[ProductController::class,'newarrivals']);
+Route::get('subcategory/mensubcategory',[SubcategoryController::class,'viewmensubcategory']);
+Route::get('subcategory/womensubcategory',[SubcategoryController::class,'viewwomensubcategory']);
 
 Route::get('/product/productdetails/{ref_no}', [ProductController::class, 'productdetail']);
 
-Route::get('/product/subcategory/{name}', [ProductController::class, 'subcategoryproducts']);
+Route::get('/product/subcategory/{name}', [SubcategoryController::class, 'subcategoryproducts']);
 Route::post('/cart/add/{id}', [CartController::class, 'addProductToCart']);
 Route::post('/cart/couponapplication', [CartController::class, 'applyCoupon']);
 Route::get('/cart/deleteartproduct/{id}', [CartController::class, 'remove']);
@@ -76,6 +78,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/admin/coupon/viewcoupon', [CouponController::class, 'viewcoupon']);
     Route::get('/admin/orders/vieworders', [OrderController::class, 'vieworder']);
     
+    Route::get('/admin/subcategory/viewsubcategories', [SubcategoryController::class, 'show']);
     Route::post('/admin/subcategory/createsubcategory', [SubcategoryController::class, 'store']);
     Route::put('/admin/subcategory/editsubcategory/{id}', [SubcategoryController::class, 'update']);
     Route::get('/admin/subcategory/deletsubcategory/{id}', [SubcategoryController::class, 'destroy']);
