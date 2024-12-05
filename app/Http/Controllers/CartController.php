@@ -46,6 +46,7 @@ class CartController extends Controller
             'product_size' => $product->product_size,
             'amount' => $product->amount,
             'images1' => $product->images1,
+            
            ]);
            $cart[$id] = [
             'user_id' => $request->user_id,
@@ -56,7 +57,8 @@ class CartController extends Controller
             'product_colors' => $product->product_colors,
             'product_size' => $product->product_size,
             'amount' => $product->amount,
-            'images1' => $product->images1,
+            // 'images1' => $product->images1,
+            'images1' => asset($product->images1),
            ];
        }
 
@@ -68,6 +70,8 @@ class CartController extends Controller
         'discount' => $product->discount,
         'amount' => $request->quantity * $product->amount,
         'quantity' => $request->quantity,
+        'images1' => asset($product->images1),
+
         // $total = $request->quantity * $product->amount,
         // $subtotal = $request->quantity * $product->amount,
         // $subtotal = $product->discount - $subtotal,

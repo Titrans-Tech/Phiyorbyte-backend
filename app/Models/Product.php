@@ -24,7 +24,7 @@ class Product extends Model
         'images1',
         'images2',
         'images3',
-        'images4',
+        'file_path',
         'ref_no',
         'status',
     ];
@@ -45,8 +45,8 @@ class Product extends Model
     }
 
     // In Product Model or API Controller
-        public function getImageUrlAttribute()
-        {
-            return asset($this->images1);
-        }
+        // public function getImageUrlAttribute()
+        // {
+        //     return asset($this->images1);
+        // }
 }

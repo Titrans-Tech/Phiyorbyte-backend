@@ -26,17 +26,30 @@ class ProductController extends Controller
             'discount' => ['required'],
             'body' => ['required'],
             'brand_name' => ['required'],
-            'images1' => 'required|mimes:jpeg,png,jpg,gif,svg',
+            'images1' =>  'required|array',
+            'images1.*' => 'image|mimes:jpeg,png,jpg,gif,svg',
+            // 'images1' => 'required|mimes:jpeg,png,jpg,gif,svg',
         ]);
+        $uploadedImages = [];
        
+         // Handle each uploaded file
+         if ($request->hasfile('images1')) {
+            foreach ($request->file('images1') as $image) {
+                
+                $path = $image->store('resourceimages1', 'public'); // 'uploads' is the folder inside 'storage/app/public'
 
-        if ($request->hasFile('images1')){
-
-            $file = $request['images1'];
-            $filename = 'SimonJonah-' . time() . '.' . $file->getClientOriginalExtension();
-            $path = $request->file('images1')->storeAs('resourceimages1', $filename);
-
+                // Add the file path to the array
+                $uploadedImages[] = $path;
+            }
         }
+        
+        // if ($request->hasFile('images1')){
+
+        //     $file = $request['images1'];
+        //     $filename = 'SimonJonah-' . time() . '.' . $file->getClientOriginalExtension();
+        //     $path = $request->file('images1')->storeAs('resourceimages1', $filename);
+
+        // }
         // $add_blog['images1'] = $path;
 
         $product = Product::create([
@@ -56,11 +69,21 @@ class ProductController extends Controller
             'ref_no' => substr(rand(0,time()),0, 9),
 
         ]);
-       
-        return [
+        return response()->json([
             'product' => $product,
-        ];
+            'uploaded_files' => $uploadedImages,
+        ]);
     }
+
+    public function firstphoto($ref_no){
+        $add_product = Product::where('ref_no', $ref_no)->first();
+        return view('dashboard.admin.firstphoto', compact('add_product'));
+    }
+    //     return redirect()->route('admin/addphoto')
+    //     // return [
+    //     //     'product' => $product,
+    //     // ];
+    // }
     public function updateproduct(Request $request, $id){
         $edit_product = Product::findOrFail($id);
         $request->validate([

@@ -65,6 +65,7 @@ Route::post('/cart/couponapplication', [CartController::class, 'applyCoupon']);
 Route::get('/cart/deleteartproduct/{id}', [CartController::class, 'remove']);
 Route::post('/cart/addcheckout', [CartController::class, 'checkout']);
 Route::get('/thankyou', [OrderController::class, 'thankyou']);
+Route::get('/firstphoto/{ref_no}', [ProductController::class, 'firstphoto']);
 
 
 Route::post('/favorite/addfavorite/{id}', [FavoriteController::class, 'addProductTofavorite']);
