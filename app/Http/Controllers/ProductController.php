@@ -36,9 +36,7 @@ class ProductController extends Controller
          if ($request->hasfile('images1')) {
             foreach ($request->file('images1') as $image) {
                 
-                $path = $image->store('resourceimages1', 'public'); // 'uploads' is the folder inside 'storage/app/public'
-
-                // Add the file path to the array
+                $path = $image->store('resourceimages1', 'public'); 
                 $uploadedImages[] = $path;
             }
         }
