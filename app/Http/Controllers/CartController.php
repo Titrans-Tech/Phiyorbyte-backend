@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\CartCollection;
 use App\Models\Cart;
 use App\Models\Coupon;
 use App\Models\Order;
@@ -234,6 +235,14 @@ public function checkout(Request $request){
 }        
 
 
+public function mycartproducts(){
+    $view_mycarts = Cart::where('user_id', auth()->user()->id)->latest()->get();
+//         return response()->json([
+//         'cart' => $view_mycarts
+//  ]);
+    return new CartCollection ($view_mycarts);
+
+ }
 
     public function remove($id)
     {

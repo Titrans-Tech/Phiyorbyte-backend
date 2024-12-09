@@ -136,9 +136,12 @@ class OrderController extends Controller
 
  public function myordersproducts(){
     $view_myproducts = Order::where('user_id', auth()->user()->id)->latest()->get();
-    return response()->json([
-        'order' => $view_myproducts
- ]);
+//     return response()->json([
+//         'order' => $view_myproducts
+//  ]);
+
+return new OrderCollection ($view_myproducts);
+
  }
 
  public function ordermydetail($id){

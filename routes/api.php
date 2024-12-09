@@ -137,6 +137,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::get('/favorite/myfavourite', [FavoriteController::class, 'myfavourites']);
   
   // myordersproduct obodobright0@gmail.com
+  Route::get('/users/cart/viewmycartitems', [CartController::class, 'mycartproducts']);
   Route::get('/users/order/viewmyorders', [OrderController::class, 'viewmyorder']);
   Route::get('/users/cart/myordersproduct', [OrderController::class, 'myordersproducts']);
   Route::get('/users/cart/orderdetails/{id}', [OrderController::class, 'ordermydetail']);
@@ -148,5 +149,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 Route::post('registeruser',[AuthController::class,'registeruser']);
 Route::post('loginuser',[AuthController::class,'loginuser']);
-Route::post('logout',[AuthController::class,'logout'])
+Route::post('users/logoutuser',[AuthController::class,'logout'])
   ->middleware('auth:sanctum');
