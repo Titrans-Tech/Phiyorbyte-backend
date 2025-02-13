@@ -120,7 +120,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::group(['prefix' => 'admin'], function () {
   Route::post('/registeradmin', [AdminController::class, 'registeradmin']);
   Route::post('/loginadmin', [AdminController::class, 'loginadmin']);
-  Route::post('/logoutadmin', [AdminController::class, 'logoutadmin']);
+  Route::get('/logoutadmin', [AdminController::class, 'logoutadmin']);
 
 });
 
@@ -128,6 +128,10 @@ Route::group(['prefix' => 'admin'], function () {
 
 
 Route::middleware(['auth:sanctum'])->group(function () {
+  
+ 
+
+
   Route::get('/users/viewmyprofile/{ref_no}', [UserController::class, 'myprofile']);
   Route::put('/users/changepasword/{ref_no}', [AuthController::class, 'changelogindetails']);
   Route::get('/users/approveduser/{ref_no}', [UserController::class, 'approveduser']);
@@ -142,12 +146,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::get('/users/cart/myordersproduct', [OrderController::class, 'myordersproducts']);
   Route::get('/users/cart/orderdetails/{id}', [OrderController::class, 'ordermydetail']);
  
- 
 });
 
 
 
 Route::post('registeruser',[AuthController::class,'registeruser']);
 Route::post('loginuser',[AuthController::class,'loginuser']);
+Route::post('/users/forgot-password', [UserController::class, 'forgotPassword']);
+Route::post('/users/reset-password', [UserController::class, 'resetPassword']);
+// Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+// Route::post('reset-password', [AuthController::class, 'resetPassword']);
 Route::post('users/logoutuser',[AuthController::class,'logout'])
   ->middleware('auth:sanctum');

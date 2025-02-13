@@ -35,9 +35,9 @@ return new class extends Migration
             $table->string('split_id')->nullable();
             $table->string('name')->nullable();
             $table->string('split_code')->nullable();
-            $table->string('type')->nullable();
-            $table->string('bearer_type')->nullable();
-            $table->string('bearer_subaccount')->nullable();
+            // $table->string('type')->nullable();
+            // $table->string('bearer_type')->nullable();
+            // $table->string('bearer_subaccount')->nullable();
             $table->string('authorization_code')->nullable();
             $table->string('split_fees')->nullable();
             $table->string('share')->nullable();
@@ -68,14 +68,14 @@ return new class extends Migration
             $table->string('bank')->nullable();
             $table->string('country_code')->nullable();
             $table->string('brand')->nullable();
-            $table->string('reusable')->nullable();
+            // $table->string('reusable')->nullable();
             $table->string('signature')->nullable();
-            $table->string('split_code')->nullable();
+            // $table->string('split_code')->nullable();
             $table->string('type')->nullable();
             $table->string('bearer_type')->nullable();
             $table->string('bearer_subaccount')->nullable();
             $table->string('reusable')->nullable();
-            $table->string('reusable')->nullable();
+            // $table->string('reusable')->nullable();
             
             
             $table->string('delivery_address')->nullable();
