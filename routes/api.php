@@ -15,7 +15,8 @@ use App\Http\Controllers\ProductsizeController;
 use App\Http\Controllers\SubcategoryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PasswordResetController;
-
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\NewPasswordController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -31,8 +32,8 @@ use App\Http\Controllers\PasswordResetController;
 //     return $request->user();
 // });
 
-Route::post('password/email', [PasswordResetController::class, 'sendResetLinkEmail']);
-Route::post('password/reset', [PasswordResetController::class, 'reset']);
+// Route::post('password/email', [PasswordResetController::class, 'sendResetLinkEmail']);
+// Route::post('password/reset', [PasswordResetController::class, 'reset']);
 
 
 Route::get('/payment', [OrderController::class, 'showPaymentForm'])->name('payment.form');
@@ -46,8 +47,8 @@ Route::get('/payment/success', function () {
 Route::get('/payment/failed', function () {
     return 'Payment failed';
 })->name('payment.failed');
-Route::post('password/email', [PasswordResetController::class, 'sendResetLinkEmail']);
-Route::post('password/reset', [PasswordResetController::class, 'reset']);
+// Route::post('password/email', [PasswordResetController::class, 'sendResetLinkEmail']);
+// Route::post('password/reset', [PasswordResetController::class, 'reset']);
 
 
 Route::get('viewcategories/{categoryname}',[ProductController::class,'viewallcategories']);
@@ -152,9 +153,35 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 Route::post('registeruser',[AuthController::class,'registeruser']);
 Route::post('loginuser',[AuthController::class,'loginuser']);
-Route::post('/users/forgot-password', [UserController::class, 'forgotPassword']);
-Route::post('/users/reset-password', [UserController::class, 'resetPassword']);
-// Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
-// Route::post('reset-password', [AuthController::class, 'resetPassword']);
+
+
+// Route::post('/users/forgot-password', [UserController::class, 'forgotPassword']);
+// Route::post('/users/reset-password', [UserController::class, 'resetPassword']);
+
+// Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.reset');
+
+
+
+
+// Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
+// Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+// Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+// Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.update');
+
+
+
+// Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
+// Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+// Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+// Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.update');
+
+
+// Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
+Route::post('forgot-password', [PasswordResetLinkController::class, 'store']);
+// Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+Route::post('reset-password', [NewPasswordController::class, 'store']);
+// Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.update');
+
 Route::post('users/logoutuser',[AuthController::class,'logout'])
   ->middleware('auth:sanctum');

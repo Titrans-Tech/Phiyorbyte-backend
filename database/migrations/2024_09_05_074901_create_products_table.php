@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('quantity')->nullable();
             $table->string('product_name')->nullable();
             $table->text('body')->nullable();
+            $table->string('name')->nullable();
             $table->float('purchase_price', 8, 2)->nullable();
             $table->float('amount', 8, 2)->nullable();
             $table->float('discount', 8, 2)->nullable();

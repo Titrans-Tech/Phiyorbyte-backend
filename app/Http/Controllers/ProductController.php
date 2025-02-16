@@ -31,8 +31,6 @@ class ProductController extends Controller
             // 'images1' => 'required|mimes:jpeg,png,jpg,gif,svg',
         ]);
         $uploadedImages = [];
-       
-         // Handle each uploaded file
          if ($request->hasfile('images1')) {
             foreach ($request->file('images1') as $image) {
                 
@@ -41,17 +39,12 @@ class ProductController extends Controller
             }
         }
         
-        // if ($request->hasFile('images1')){
 
-        //     $file = $request['images1'];
-        //     $filename = 'SimonJonah-' . time() . '.' . $file->getClientOriginalExtension();
-        //     $path = $request->file('images1')->storeAs('resourceimages1', $filename);
-
-        // }
-        // $add_blog['images1'] = $path;
+      
 
         $product = Product::create([
-            'images1' => $path,
+            'images1' => $uploadedImages,
+            // 'images1' => json_encode($path), // Store as JSON
             'product_name' => $request->product_name,
             'name' => $request->name,
             
@@ -69,7 +62,7 @@ class ProductController extends Controller
         ]);
         return response()->json([
             'product' => $product,
-            'uploaded_files' => $uploadedImages,
+            // 'uploaded_files' => asset($product->images1),
         ]);
     }
 
@@ -84,6 +77,11 @@ class ProductController extends Controller
     // }
     public function updateproduct(Request $request, $id){
         $edit_product = Product::findOrFail($id);
+        if (!$edit_product) {
+            return response()->json([
+                'message' => 'product  not found'
+            ], 404);
+        }
         $request->validate([
             'product_name' => ['nullable'],
             'name' => ['nullable'],
@@ -99,16 +97,16 @@ class ProductController extends Controller
             'brand_name' => ['nullable'],
             'images1' => 'nullable|mimes:jpeg,png,jpg,gif,svg',
         ]);
-        if ($request->hasFile('images1')){
-
-            $file = $request['images1'];
-            $filename = 'SimonJonah-' . time() . '.' . $file->getClientOriginalExtension();
-            $path = $request->file('images1')->storeAs('resourceimages1', $filename);
-            
-            $edit_product['images1'] = $path;
-
-        }
+        $uploadedImages = [];
+        if ($request->hasfile('images1')) {
+           foreach ($request->file('images1') as $image) {
+               
+               $path = $image->store('resourceimages1', 'public'); 
+               $uploadedImages[] = $path;
+           }
+       }
         $edit_product->update([
+            'images1' => $uploadedImages,
             'product_name' => $request->product_name,
             'name' => $request->name,
             'product_colors' => $request->product_colors,

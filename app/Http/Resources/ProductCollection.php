@@ -21,7 +21,9 @@ class ProductCollection extends ResourceCollection
                     'product_size' => $product->product_size,
                     'name' => $product->name,
                     'ref_no' => $product->ref_no,
-                    'images1' => asset($product->images1),
+                    'images1' => collect($product->images1)->map(function ($image) {
+                        return asset('storage/' . $image);
+                    }),
                     'quantity' => $product->quantity,
                     'purchase_price' => $product->purchase_price,
                     'amount' => $product->amount,

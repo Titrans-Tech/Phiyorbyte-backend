@@ -22,13 +22,16 @@ class Product extends Model
         'product_size',
         'name',
         'images1',
-        'images2',
-        'images3',
-        'file_path',
+        // 'images2',
+        // 'images3',
+        // 'file_path',
         'ref_no',
         'status',
     ];
 
+    protected $casts = [
+        'images1' => 'array',
+    ];
 
     public function favorites(){
     
