@@ -24,9 +24,9 @@ class OrdersCollection extends ResourceCollection
                     'order_no' => $view_myoders->product->ref_no,
                     'product_name' => $view_myoders->product->product_name,
                     'amount' => $view_myoders->amount,
-                    'images1' => collect($view_myoders->images1)->map(function ($image) {
-                        return asset($image);
-                    }),
+                    'images1' => collect(json_decode($view_myoders->images1, true))->map(function ($image) {
+                         return asset($image);
+                        }),
                     'quantity' => $view_myoders->quantity,
                     'status' => $view_myoders->status,
                     'created_at' => $view_myoders->created_at->toDateTimeString(),

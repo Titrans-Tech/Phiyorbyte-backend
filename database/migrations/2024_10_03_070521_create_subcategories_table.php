@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('ref_no')->nullable();
             $table->string('name')->nullable();
+            $table->string('categoryname')->nullable();
             $table->string('slug')->nullable();
             $table->timestamps();
         });

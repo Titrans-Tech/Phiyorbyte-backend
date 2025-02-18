@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\OrderResource;
 use App\Http\Resources\OrdersCollection;
+use App\Http\Resources\OrdersResource;
 use App\Models\Order;
 use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
@@ -121,7 +123,7 @@ class OrdersController extends Controller
 
  public function viewmyorder(){
     $view_myoders = Order::where('user_id', auth()->user()->id)->latest()->get();
-    return new  ($view_myoders);
+    return new  OrdersCollection($view_myoders);
     
  }
  public function vieworder(){
@@ -141,9 +143,11 @@ return new OrdersCollection ($view_myproducts);
 
  public function ordermydetail($id){
     $view_myordetails = Order::find($id);
-    return response()->json([
-        'order' => $view_myordetails
- ]);
+
+    return new OrdersResource($view_myordetails);
+//     return response()->json([
+//         'order' => $view_myordetails
+//  ]);
  }
  
  

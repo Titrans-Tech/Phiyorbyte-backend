@@ -61,8 +61,7 @@ class ProductController extends Controller
 
         ]);
         return response()->json([
-            'product' => $product,
-            // 'uploaded_files' => asset($product->images1),
+           'message' => 'Product  Added successfully',
         ]);
     }
 
@@ -122,7 +121,7 @@ class ProductController extends Controller
        
         return [
             'message' => 'Product updated successfully!',
-            'product' => $edit_product,
+            
         ];
     }
 
@@ -196,7 +195,7 @@ class ProductController extends Controller
 
     
     public function newarrivals(){
-        $product = Product::latest()->get();
+        $product = Product::latest()->take(20)->get();
         if (!$product) {
             return response()->json([
                 'message' => 'product size not found'
