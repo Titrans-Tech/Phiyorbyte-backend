@@ -15,16 +15,18 @@ class CartCollection extends ResourceCollection
     public function toArray(Request $request): array
     {
         return [
-            'data' => $this->collection->transform(function ($view_mycarts) {
+            'data' => $this->collection->transform(function ($view_myoders) {
                 return [
-                    'user_id' => $view_mycarts->user_id,
-                    'product_name' => $view_mycarts->product_name,
-                    'quantity' => $view_mycarts->quantity,
-                    'images1' => asset($view_mycarts->images1),
-                    'product_colors' => $view_mycarts->product_colors,
-                    'amount' => $view_mycarts->amount,
-                    'product_size' => $view_mycarts->product_size,
-                    'created_at' => $view_mycarts->created_at->toDateTimeString(),
+                    'user_id' => $view_myoders->user_id,
+                    'product_name' => $view_myoders->product_name,
+                    'quantity' => $view_myoders->quantity,
+                    'images1' => collect($view_myoders->images1)->map(function ($image) {
+                        return asset($image);
+                    }),
+                    'product_colors' => $view_myoders->product_colors,
+                    'amount' => $view_myoders->amount,
+                    'product_size' => $view_myoders->product_size,
+                    'created_at' => $view_myoders->created_at->toDateTimeString(),
                 ];
             }),
             'total' => $this->collection->count(),

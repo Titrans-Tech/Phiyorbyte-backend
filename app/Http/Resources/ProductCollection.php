@@ -22,7 +22,7 @@ class ProductCollection extends ResourceCollection
                     'name' => $product->name,
                     'ref_no' => $product->ref_no,
                     'images1' => collect($product->images1)->map(function ($image) {
-                        return asset('storage/' . $image);
+                        return asset($image);
                     }),
                     'quantity' => $product->quantity,
                     'purchase_price' => $product->purchase_price,

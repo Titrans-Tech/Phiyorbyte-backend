@@ -9,10 +9,10 @@ class Cart extends Model
 {
     use HasFactory;
 
-    protected $casts = [
-        'quantity' => 'array', // It will automatically serialize/deserialize
-        'amount' => 'array', // It will automatically serialize/deserialize
-    ];
+    // protected $casts = [
+    //     'quantity' => 'array', // It will automatically serialize/deserialize
+    //     'amount' => 'array', // It will automatically serialize/deserialize
+    // ];
 
     public function setquantityAttribute($value)
 {
@@ -32,6 +32,11 @@ public function getquantityAttribute($value)
         'product_name',
         'amount',
         'images1',
+    ];
+
+
+    protected $casts = [
+        'images1' => 'array',
     ];
 
     public function product()

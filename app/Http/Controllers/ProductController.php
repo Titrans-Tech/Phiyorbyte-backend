@@ -255,8 +255,15 @@ class ProductController extends Controller
 
     function productdetail($ref_no){
         $product_details = Product::where('ref_no', $ref_no)->first();
-        return response()->json([
-            'product' => $product_details
-        ], 200);
+        if (!$product_details) {
+            return response()->json([
+                'message' => 'product size not found'
+            ], 404);
+        }
+
+        return new ProductResource($product_details);
+        // return response()->json([
+        //     'product' => $product_details
+        // ], 200);
     }
 }

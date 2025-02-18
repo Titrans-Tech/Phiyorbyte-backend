@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+// use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\CartCollection;
 use App\Models\Cart;
 use App\Models\Coupon;
@@ -46,8 +46,9 @@ class CartController extends Controller
             'product_colors' => $product->product_colors,
             'product_size' => $product->product_size,
             'amount' => $product->amount,
-            'images1' => $product->images1,
-            
+            'images1' => collect($product->images1)->map(function ($image) {
+                return asset($image);
+            }),
            ]);
            $cart[$id] = [
             'user_id' => $request->user_id,
@@ -59,7 +60,7 @@ class CartController extends Controller
             'product_size' => $product->product_size,
             'amount' => $product->amount,
             // 'images1' => $product->images1,
-            'images1' => asset($product->images1),
+        //    'images1' => json_encode($request->images1),
            ];
        }
 
@@ -67,12 +68,16 @@ class CartController extends Controller
        return response()->json([
   
         'message' => 'Product added to cart', 
-        'cart_item' => $product,
         'discount' => $product->discount,
         'amount' => $request->quantity * $product->amount,
         'quantity' => $request->quantity,
-        'images1' => asset($product->images1),
-
+        'name' => $product->discount,
+        'categoryname' => $product->categoryname,
+        "brand_name" => $product->brand_name,
+        "product_name" => $product->product_name,
+        'images1' => collect($product->images1)->map(function ($image) {
+            return asset($image);
+        }),
         // $total = $request->quantity * $product->amount,
         // $subtotal = $request->quantity * $product->amount,
         // $subtotal = $product->discount - $subtotal,
@@ -126,35 +131,37 @@ public function applyCoupon(Request $request){
 }
 
    
-public function checkout(Request $request){
+public function checkout(Request $request, $id){
+    $getproduct_id = Cart::find($id);
+    if(!$getproduct_id) {
+        return response()->json([
+             'error', 'Product not found.'
+        ], 404);
+    }
     $reference = substr(rand(0,time()),0, 9);
-    $request->validate([
-        'user_id' => 'required',
-        'email' => 'required',
-        'phone' => 'required',
-        'first_name' => 'required',
-        'last_name' => 'required',
-        'product_id' => 'required',
-        'amount' => 'required',
-        'quantity' => 'required',
-        'first_name' => 'required',
-        'last_name' => 'required',
-    ]);
+
+  
+    
     try {
         // Initialize transaction on Paystack with split details
         $response = Http::withToken('sk_test_2480c735552c0c451064507cb47a75d736c5c969')
             ->post('https://api.paystack.co/transaction/initialize', [
-                'email' => $request->email, 
-                'amount' => $request->amount, 
-                'reference' => $reference,
-                'user_id' => $request->user_id,
-                'first_name' => $request->first_name,
-                'last_name' => $request->lname,
-                'user_id' => $request->user_id,
-                'first_name' => $request->first_name,
-                'last_name' => $request->last_name,
-                'product_id' => $request->product_id,
+               
+                'user_id' => $getproduct_id->id,
+                'first_name' => $getproduct_id->name,
+                'last_name' => $getproduct_id->name,
+                'email' => $request->email,
                 'phone' => $request->phone,
+                'coupon_code' => $request->coupon_code,
+                'product_id' => $getproduct_id->id,
+                'quantity' => $getproduct_id->quantity,
+                'product_name' => $getproduct_id->product_name,
+                'product_colors' => $getproduct_id->product_colors,
+                'product_size' => $getproduct_id->product_size,
+                'amount' => $request->amount,
+               
+               
+             
                 'callback_url' => route('payment.callback'),  // URL to redirect after payment
                 'split' => [
                     'type' => 'percentage', // or 'flat' if you want a fixed amount
@@ -174,36 +181,36 @@ public function checkout(Request $request){
             $result = json_decode($response->getBody()->getContents(), true);
    
 
-            return response()->json([
-                'data' => $result,
-            ]);
+            // return response()->json([
+            //     'data' => $result,
+            // ]);
 
+           
+            $user = Auth::user();
+
+            //  return response()->json([
+            //     'data' => $user->namefor,
+            // ]);
         $result = $response->json();
         $order = Order::create([
             'quantity' => $request->quantity,
             'ref_no' => substr(rand(0,time()),0, 9),
             'amount' => $request->amount,
-            'email' => $request->email,
+            'user_id' => auth()->user()->id,
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
+            'email' => $user->email,
             'phone' => $request->phone,
-            'user_id' => $request->user_id,
-            'product_id' => $request->product_id,
-            'first_name' => $request->fname,
-            'phone' => $request->phone,
-            'last_name' => $request->lname,
+            'product_id' => $getproduct_id->product_id,
+           
             'reference' => $reference,
-            'productname' => $request->productname,
-            // 'currency' => $request->currency,
+            'productname' => $getproduct_id->product_name,
             'currency' => 'NGN',
-            // 'channels' => $request->channels,
-            'images1' => $request->images1,
-            'images2' => $request->images2,
-            'images3' => $request->images3,
-            'images4' => $request->images4,
-            'images5' => $request->images5,
+          
             'status' => 'pending',
-
+            'images1' => collect($getproduct_id->images1)->map(function ($image) {
+                        return asset($image);
+            }),
 
             //DELEVERY DETAIL
             'delivery_address' => $request->delivery_address,
@@ -215,7 +222,7 @@ public function checkout(Request $request){
 
             
         ]);
-        // $result = json_decode($response->getBody()->getContents(), true);
+    // $result = json_decode($response->getBody()->getContents(), true);
         return response()->json([
             'order' => $order,
             'result' => $result

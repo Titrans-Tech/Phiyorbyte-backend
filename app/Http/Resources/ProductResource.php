@@ -19,8 +19,8 @@ class ProductResource extends JsonResource
             'product_size' => $this->product_size,
             'ref_no' => $this->ref_no,
             'images1' => collect($this->images1)->map(function ($image) {
-                return asset('storage/' . $image);
-            }),
+                        return asset($image);
+                    }),
             'quantity' => $this->quantity,
             'purchase_price' => $this->purchase_price,
             'amount' => $this->amount,

@@ -8,7 +8,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\FavoriteController;
-use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\ProductcolorController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductsizeController;
@@ -36,9 +36,9 @@ use App\Http\Controllers\Auth\NewPasswordController;
 // Route::post('password/reset', [PasswordResetController::class, 'reset']);
 
 
-Route::get('/payment', [OrderController::class, 'showPaymentForm'])->name('payment.form');
-Route::post('/payment/process', [OrderController::class, 'processPayment'])->name('payment.process');
-Route::get('/payment/callback', [OrderController::class, 'paymentCallback'])->name('payment.callback');
+Route::get('/payment', [OrdersController::class, 'showPaymentForm'])->name('payment.form');
+Route::post('/payment/process', [OrdersController::class, 'processPayment'])->name('payment.process');
+Route::get('/payment/callback', [OrdersController::class, 'paymentCallback'])->name('payment.callback');
 
 Route::get('/payment/success', function () {
     return 'Payment successful';
@@ -58,28 +58,24 @@ Route::get('category/newarrivalcategory',[ProductController::class,'newarrivals'
 Route::get('subcategory/mensubcategory',[SubcategoryController::class,'viewmensubcategory']);
 Route::get('subcategory/womensubcategory',[SubcategoryController::class,'viewwomensubcategory']);
 
-Route::get('/product/productdetails/{ref_no}', [ProductController::class, 'productdetail']);
 
 Route::get('/product/subcategory/{name}', [SubcategoryController::class, 'subcategoryproducts']);
-Route::post('/cart/add/{id}', [CartController::class, 'addProductToCart']);
-Route::post('/cart/couponapplication', [CartController::class, 'applyCoupon']);
-Route::get('/cart/deleteartproduct/{id}', [CartController::class, 'remove']);
-Route::post('/cart/addcheckout', [CartController::class, 'checkout']);
-Route::get('/thankyou', [OrderController::class, 'thankyou']);
+
+Route::get('/thankyou', [OrdersController::class, 'thankyou']);
 Route::get('/firstphoto/{ref_no}', [ProductController::class, 'firstphoto']);
 
 
 Route::post('/favorite/addfavorite/{id}', [FavoriteController::class, 'addProductTofavorite']);
 Route::post('/favorite/addcoupon', [FavoriteController::class, 'applyCoupon']);
-Route::post('/favorite/addcheckout', [FavoriteController::class, 'checkout']);
+Route::post('/favorite/addcheckout', [FavoriteController::class, 'checkouto']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/admin/coupon/editcoupon/{id}', [CouponController::class, 'update']);
     Route::get('/admin/coupon/deletecoupon/{id}', [CouponController::class, 'destroy']);
     Route::post('/admin/coupon/createcouponcode', [CouponController::class, 'store']);
     Route::get('/admin/coupon/viewcoupon', [CouponController::class, 'viewcoupon']);
-    Route::get('/admin/orders/vieworders', [OrderController::class, 'vieworder']);
-    
+    Route::get('/admin/orders/vieworders', [OrdersController::class, 'vieworder']);
+    Route::post('/cart/addcheckout/{id}', [CartController::class, 'checkout']);
     Route::get('/admin/subcategory/viewsubcategories', [SubcategoryController::class, 'show']);
     Route::post('/admin/subcategory/createsubcategory', [SubcategoryController::class, 'store']);
     Route::put('/admin/subcategory/editsubcategory/{id}', [SubcategoryController::class, 'update']);
@@ -132,6 +128,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
   
  
 
+  Route::get('/product/productdetails/{ref_no}', [ProductController::class, 'productdetail']);
 
   Route::get('/users/viewmyprofile/{ref_no}', [UserController::class, 'myprofile']);
   Route::put('/users/changepasword/{ref_no}', [AuthController::class, 'changelogindetails']);
@@ -143,10 +140,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
   
   // myordersproduct obodobright0@gmail.com
   Route::get('/users/cart/viewmycartitems', [CartController::class, 'mycartproducts']);
-  Route::get('/users/order/viewmyorders', [OrderController::class, 'viewmyorder']);
-  Route::get('/users/cart/myordersproduct', [OrderController::class, 'myordersproducts']);
-  Route::get('/users/cart/orderdetails/{id}', [OrderController::class, 'ordermydetail']);
+  Route::get('/users/order/viewmyorders', [OrdersController::class, 'viewmyorder']);
+  Route::get('/users/cart/myordersproduct', [OrdersController::class, 'myordersproducts']);
+  Route::get('/users/cart/orderdetails/{id}', [OrdersController::class, 'ordermydetail']);
  
+
+  Route::post('/cart/add/{id}', [CartController::class, 'addProductToCart']);
+  Route::post('/cart/couponapplication', [CartController::class, 'applyCoupon']);
+  Route::get('/cart/deleteartproduct/{id}', [CartController::class, 'remove']);
+
 });
 
 

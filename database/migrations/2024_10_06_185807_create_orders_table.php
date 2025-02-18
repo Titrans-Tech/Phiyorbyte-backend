@@ -76,6 +76,7 @@ return new class extends Migration
             $table->string('bearer_subaccount')->nullable();
             $table->string('reusable')->nullable();
             // $table->string('reusable')->nullable();
+            $table->json('images1')->nullable();
             
             
             $table->string('delivery_address')->nullable();
