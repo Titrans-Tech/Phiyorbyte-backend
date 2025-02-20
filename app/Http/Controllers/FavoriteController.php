@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\FavouriteCollection;
 use App\Models\Coupon;
 use App\Models\Favorite;
 use App\Models\Product;
@@ -25,7 +26,9 @@ class FavoriteController extends Controller
            $favorite[$id]['quantity']++;
        } else {
            $favorite = Favorite::create([
-            'user_id' => $request->user_id,
+            'user_id' => auth()->user()->id,
+            'ref_no' => substr(rand(0,time()),0, 9),
+
             'coupon_code' => $request->coupon_code,
             'product_id' => $product->id,
             'quantity' => $request->quantity,
@@ -34,19 +37,23 @@ class FavoriteController extends Controller
             'product_size' => $product->product_size,
             'amount' => $product->amount,
             'discount' => $product->discount,
-            'images1' => $product->images1,
+            'images1' => collect($product->images1)->map(function ($image) {
+            return asset($image);
+            }),
            ]);
            $favorite[$id] = [
-            'user_id' => $request->user_id,
+            // 'user_id' => $request->user_id,
             'coupon_code' => $request->coupon_code,
-            'product_id' => $product->id,
+            // 'product_id' => $product->id,
             'quantity' => $request->quantity,
             'product_name' => $product->product_name,
             'product_colors' => $product->product_colors,
             'product_size' => $product->product_size,
             'discount' => $product->discount,
             'amount' => $product->amount,
-            'images1' => $product->images1,
+            'images1' => collect($product->images1)->map(function ($image) {
+            return asset($image);
+            }),
            ];
        }
 
@@ -54,12 +61,18 @@ class FavoriteController extends Controller
        return response()->json([
   
         'message' => 'Product added to favorite', 
-        'favorite_item' => $product,
+        'images1' => collect($product->images1)->map(function ($image) {
+            return asset($image);
+         }),
         'amount' => $request->quantity * $product->amount,
         'quantity' => $request->quantity,
+        'product_name' => $product->product_name,
+        'product_colors' => $product->product_colors,
+        'product_size' => $product->product_size,
+        'discount' => $product->discount,
         $total = $request->quantity * $product->amount,
-        $subtotal = $request->quantity * $product->amount,
-        $subtotal = $product->discount / $subtotal * 100,
+        // $subtotal = $request->quantity * $product->amount,
+        $subtotal = $product->discount,
         $tot = $total - $subtotal,
         $tot,
     ], 200);
@@ -152,10 +165,12 @@ public function checkout(Request $request)
 
 
     public function myfavourites(){
-        $view_myfavourites = Favorite::where('user_id', auth()->user()->id)->get();
-        return response()->json([
-            'favourite' => $view_myfavourites,
-        ]);
+        $view_myfavourites = Favorite::where('user_id', auth()->user()->id)->latest()->get();
+        
+        return new FavouriteCollection ($view_myfavourites);
+        // return response()->json([
+        //     'favourite' => $view_myfavourites,
+        // ]);
     }
 
 }

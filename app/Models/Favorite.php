@@ -20,6 +20,11 @@ class Favorite extends Model
         'images1',
     ];
 
+
+
+    protected $casts = [
+        'images1' => 'array',
+    ];
     public function product()
     {
     return $this->belongsTo(Product::class);

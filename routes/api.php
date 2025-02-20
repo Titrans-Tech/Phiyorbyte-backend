@@ -65,9 +65,7 @@ Route::get('/thankyou', [OrdersController::class, 'thankyou']);
 Route::get('/firstphoto/{ref_no}', [ProductController::class, 'firstphoto']);
 
 
-Route::post('/favorite/addfavorite/{id}', [FavoriteController::class, 'addProductTofavorite']);
-Route::post('/favorite/addcoupon', [FavoriteController::class, 'applyCoupon']);
-Route::post('/favorite/addcheckout', [FavoriteController::class, 'checkouto']);
+
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/admin/coupon/editcoupon/{id}', [CouponController::class, 'update']);
@@ -92,7 +90,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/admin/productsize/editsize/{id}', [ProductsizeController::class, 'update']);
     Route::get('/admin/productsize/deletesize/{id}', [ProductsizeController::class, 'destroysize']);
     Route::get('/admin/productsize/viewsizes', [ProductsizeController::class, 'viewsize']);
-    
+    // favorite/addfavorite/14
     
     Route::post('/admin/products/createproducts', [ProductController::class, 'createproduct']);
     Route::put('/admin/products/editproducts/{id}', [ProductController::class, 'updateproduct']);
@@ -149,6 +147,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::post('/cart/couponapplication', [CartController::class, 'applyCoupon']);
   Route::get('/cart/deleteartproduct/{id}', [CartController::class, 'remove']);
 
+
+
+  Route::post('/favorite/addfavorite/{id}', [FavoriteController::class, 'addProductTofavorite']);
+  Route::post('/favorite/addcoupon', [FavoriteController::class, 'applyCoupon']);
+  Route::post('/favorite/addcheckout', [FavoriteController::class, 'checkouto']);
 });
 
 
