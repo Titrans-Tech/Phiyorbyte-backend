@@ -17,6 +17,7 @@ class ProductCollection extends ResourceCollection
         return [
             'data' => $this->collection->transform(function ($product) {
                 return [
+                    'id' => $product->id,
                     'product_colors' => $product->product_colors,
                     'product_size' => $product->product_size,
                     'name' => $product->name,

@@ -28,20 +28,32 @@ class ProductController extends Controller
             'brand_name' => ['required'],
             'images1' =>  'required|array',
             'images1.*' => 'image|mimes:jpeg,png,jpg,gif,svg',
-            // 'images1' => 'required|mimes:jpeg,png,jpg,gif,svg',
         ]);
+       
+        //  if ($request->hasfile('images1')) {
+        //     foreach ($request->file('images1') as $image) {
+        //         $path = $image->store('resourceimages1', 'public'); 
+        //         $uploadedImages[] = $path;
+        //     }
+        // }
+
+
         $uploadedImages = [];
-         if ($request->hasfile('images1')) {
+        if ($request->hasfile('images1')) {
             foreach ($request->file('images1') as $image) {
-                
-                $path = $image->store('resourceimages1', 'public'); 
-                $uploadedImages[] = $path;
+                // Define the file name and path
+                $fileName = time() . '_' . $image->getClientOriginalName();
+                $destinationPath = public_path('resourceimages1');
+    
+                // Move the file to public/resourceimages1
+                $image->move($destinationPath, $fileName);
+    
+                // Save relative path
+                $uploadedImages[] = 'resourceimages1/' . $fileName;
             }
         }
+
         
-
-      
-
         $product = Product::create([
             'images1' => $uploadedImages,
             // 'images1' => json_encode($path), // Store as JSON
@@ -147,9 +159,7 @@ class ProductController extends Controller
                 'message' => 'product size not found'
             ], 404);
         }
-       return response()->json([
-            'product' => $product,
-        ], 200);
+        return new ProductCollection ($product);
     }
 
 
@@ -163,22 +173,9 @@ class ProductController extends Controller
         
         return new ProductCollection ($product);
 
-    //    return response()->json([
-    //         'product' => $product,
-    //         'images1' => asset($product->images1),
-    //     ], 200);
     }
 
-    // public function subcategoryproducts(){
-    //     $product = Product::where('name', 'Sport')->get();
-    //     if (!$product) {
-    //         return response()->json([
-    //             'message' => 'product size not found'
-    //         ], 404);
-    //     }
-    //     return new ProductCollection ($product);
 
-    // }
 
     
 

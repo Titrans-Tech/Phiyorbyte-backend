@@ -72,6 +72,7 @@ class CartController extends Controller
         'amount' => $request->quantity * $product->amount,
         'quantity' => $request->quantity,
         'name' => $product->discount,
+        'product_id' => $product->product_id,
         'categoryname' => $product->categoryname,
         "brand_name" => $product->brand_name,
         "product_name" => $product->product_name,
@@ -243,11 +244,12 @@ public function checkout(Request $request, $id){
 
 
 public function mycartproducts(){
-    $view_mycarts = Cart::where('user_id', auth()->user()->id)->latest()->get();
-//         return response()->json([
-//         'cart' => $view_mycarts
-//  ]);
-    return new CartCollection ($view_mycarts);
+    // $view_mycarts = Cart::where('user_id', auth()->user()->id)->latest()->get();
+    $view_mycarts = session()->get('cart');
+    // return response()->json([
+    //     'data' => $view_mycarts,
+    // ]);
+   return new CartCollection ($view_mycarts);
 
  }
 

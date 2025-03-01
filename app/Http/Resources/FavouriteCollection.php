@@ -17,6 +17,8 @@ class FavouriteCollection extends ResourceCollection
         return [
             'data' => $this->collection->transform(function ($view_myoders) {
                 return [
+                    'id' => $view_myoders->id,
+
                     'ref_no' => $view_myoders->ref_no,
                     'product_name' => $view_myoders->product_name,
                     'quantity' => $view_myoders->quantity,

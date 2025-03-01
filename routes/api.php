@@ -120,13 +120,10 @@ Route::group(['prefix' => 'admin'], function () {
 });
 
 
-
+Route::get('/product/productdetails/{ref_no}', [ProductController::class, 'productdetail']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
-  
- 
-
-  Route::get('/product/productdetails/{ref_no}', [ProductController::class, 'productdetail']);
+  Route::get('/users/cart/viewmycartitems', [CartController::class, 'mycartproducts']);
 
   Route::get('/users/viewmyprofile/{ref_no}', [UserController::class, 'myprofile']);
   Route::put('/users/changepasword/{ref_no}', [AuthController::class, 'changelogindetails']);
@@ -137,7 +134,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::get('/favorite/myfavourite', [FavoriteController::class, 'myfavourites']);
   
   // myordersproduct obodobright0@gmail.com
-  Route::get('/users/cart/viewmycartitems', [CartController::class, 'mycartproducts']);
+  
   Route::get('/users/order/viewmyorders', [OrdersController::class, 'viewmyorder']);
   Route::get('/users/cart/myordersproduct', [OrdersController::class, 'myordersproducts']);
   Route::get('/users/cart/orderdetails/{id}', [OrdersController::class, 'ordermydetail']);

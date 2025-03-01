@@ -17,6 +17,7 @@ class CartCollection extends ResourceCollection
         return [
             'data' => $this->collection->transform(function ($view_myoders) {
                 return [
+                    'id' => $view_myoders->id,
                     'user_id' => $view_myoders->user_id,
                     'product_name' => $view_myoders->product_name,
                     'quantity' => $view_myoders->quantity,

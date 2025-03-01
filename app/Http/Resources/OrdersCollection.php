@@ -17,6 +17,8 @@ class OrdersCollection extends ResourceCollection
         return [
             'data' => $this->collection->transform(function ($view_myoders) {
                 return [
+                    'id' => $view_myoders->id,
+
                     'product_id' => $view_myoders->product_id,
                     'product_no' => $view_myoders->ref_no,
                     'first_name' => $view_myoders->first_name,
