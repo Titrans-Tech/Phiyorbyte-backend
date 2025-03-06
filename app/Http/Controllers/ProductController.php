@@ -262,4 +262,11 @@ class ProductController extends Controller
         //     'product' => $product_details
         // ], 200);
     }
+
+
+    public function displayallproduct(){
+        $product = Product::latest()->get();
+
+        return new ProductCollection($product);
+    }
 }

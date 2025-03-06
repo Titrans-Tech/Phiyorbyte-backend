@@ -16,7 +16,7 @@ class CouponController extends Controller
             'discount' => ['required'],
             'valid_from' => ['required'],
             'valid_to' => ['required'],
-            'usage_limit' => ['required'],
+            'usage_limit' => ['nullable'],
             
             'user_id' => 'nullable',
             

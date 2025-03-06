@@ -13,7 +13,7 @@ class FavoriteController extends Controller
 {
     public function addProductTofavorite(Request $request, $id)
     {
-        
+        $cartData = $request->input('cart');
         $product = Product::find($id);
        if(!$product) {
            return response()->json([
@@ -28,7 +28,7 @@ class FavoriteController extends Controller
            $favorite = Favorite::create([
             'user_id' => auth()->user()->id,
             'ref_no' => substr(rand(0,time()),0, 9),
-
+            'session_id' => $request->session_id,
             'coupon_code' => $request->coupon_code,
             'product_id' => $product->id,
             'quantity' => $request->quantity,
@@ -44,7 +44,7 @@ class FavoriteController extends Controller
            $favorite[$id] = [
             // 'user_id' => $request->user_id,
             'coupon_code' => $request->coupon_code,
-            // 'product_id' => $product->id,
+            'product_id' => $product->id,
             'quantity' => $request->quantity,
             'product_name' => $product->product_name,
             'product_colors' => $product->product_colors,
@@ -70,11 +70,13 @@ class FavoriteController extends Controller
         'product_colors' => $product->product_colors,
         'product_size' => $product->product_size,
         'discount' => $product->discount,
-        $total = $request->quantity * $product->amount,
+        // 'discount' => $product->discount,
+        
+       // $total = $request->quantity * $product->amount,
         // $subtotal = $request->quantity * $product->amount,
-        $subtotal = $product->discount,
-        $tot = $total - $subtotal,
-        $tot,
+        // $subtotal = $product->discount,
+        // $tot = $total - $subtotal,
+        // $tot,
     ], 200);
 }
     

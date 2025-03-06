@@ -18,6 +18,7 @@ class Favorite extends Model
         'product_name',
         'amount',
         'images1',
+        'session_id',
     ];
 
 

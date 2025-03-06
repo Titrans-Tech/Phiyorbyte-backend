@@ -76,7 +76,7 @@ class Order extends Model
         'delivery_city',
         'pick_station',
         'oderstatus',
-
+        'cart_amount',
        
         
     ];

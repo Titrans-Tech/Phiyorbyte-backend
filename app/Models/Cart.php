@@ -31,13 +31,17 @@ public function getquantityAttribute($value)
         'product_size',
         'product_name',
         'amount',
+        'coupon_id',
         'images1',
     ];
 
 
     protected $casts = [
         'images1' => 'array',
+        'quantity' => 'integer',
+        'price' => 'decimal:2',
     ];
+    
 
     public function product()
     {

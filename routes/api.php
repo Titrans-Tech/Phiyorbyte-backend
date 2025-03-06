@@ -58,6 +58,7 @@ Route::get('category/newarrivalcategory',[ProductController::class,'newarrivals'
 Route::get('subcategory/mensubcategory',[SubcategoryController::class,'viewmensubcategory']);
 Route::get('subcategory/womensubcategory',[SubcategoryController::class,'viewwomensubcategory']);
 
+Route::get('product/displayallproducts',[ProductController::class,'displayallproduct']);
 
 Route::get('/product/subcategory/{name}', [SubcategoryController::class, 'subcategoryproducts']);
 
@@ -73,7 +74,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/admin/coupon/createcouponcode', [CouponController::class, 'store']);
     Route::get('/admin/coupon/viewcoupon', [CouponController::class, 'viewcoupon']);
     Route::get('/admin/orders/vieworders', [OrdersController::class, 'vieworder']);
-    Route::post('/cart/addcheckout/{id}', [CartController::class, 'checkout']);
+    Route::post('/cart/addcheckout', [CartController::class, 'checkout']);
     Route::get('/admin/subcategory/viewsubcategories', [SubcategoryController::class, 'show']);
     Route::post('/admin/subcategory/createsubcategory', [SubcategoryController::class, 'store']);
     Route::put('/admin/subcategory/editsubcategory/{id}', [SubcategoryController::class, 'update']);
@@ -140,7 +141,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::get('/users/cart/orderdetails/{id}', [OrdersController::class, 'ordermydetail']);
  
 
-  Route::post('/cart/add/{id}', [CartController::class, 'addProductToCart']);
+  Route::post('/carts/add/{id}', [CartController::class, 'addProductToCart']);
   Route::post('/cart/couponapplication', [CartController::class, 'applyCoupon']);
   Route::get('/cart/deleteartproduct/{id}', [CartController::class, 'remove']);
 
@@ -148,7 +149,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
   Route::post('/favorite/addfavorite/{id}', [FavoriteController::class, 'addProductTofavorite']);
   Route::post('/favorite/addcoupon', [FavoriteController::class, 'applyCoupon']);
-  Route::post('/favorite/addcheckout', [FavoriteController::class, 'checkouto']);
+  Route::post('/favorite/addcheckout2', [FavoriteController::class, 'checkouto']);
 });
 
 

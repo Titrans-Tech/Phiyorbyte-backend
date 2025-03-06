@@ -24,9 +24,14 @@ class CartCollection extends ResourceCollection
                     'images1' => collect($view_myoders->images1)->map(function ($image) {
                         return asset($image);
                     }),
+
+                    
                     'product_colors' => $view_myoders->product_colors,
                     'amount' => $view_myoders->amount,
                     'product_size' => $view_myoders->product_size,
+
+
+                    'total' => $view_myoders->quantity * $view_myoders->amount,
                     'created_at' => $view_myoders->created_at->toDateTimeString(),
                 ];
             }),
