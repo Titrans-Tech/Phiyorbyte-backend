@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\OrdersCollection;
 use App\Http\Resources\OrdersResource;
+use App\Models\Cart;
 use App\Models\Order;
 use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
@@ -36,7 +37,10 @@ class OrdersController extends Controller
          $reference = $request->query('reference');
          if ($result['status'] && $result['status'] == 'success') {
          $payment = Order::where('reference', $reference)->first();
-             
+            //  return response([
+            //     'message' => $result,
+            //  ]);
+            
             $payment->update([
                  'status' => 'success',
                  'domain' => $result['data']['domain'],
@@ -90,7 +94,50 @@ class OrdersController extends Controller
 
                 
             ]);
+            
             // dd($result);
+            Order::where('user_id', $payment->user_id)->update([
+                'status' => 'success',
+                'domain' => $payment['domain'],
+                 'requested_amount' => $payment['requested_amount'],
+                 'paidAt' => $payment['paidAt'],
+                 'gateway_response' => $payment['gateway_response'],
+                 'channel' => $payment['channel'],
+                 'ip_address' => $payment['ip_address'],
+                 'channel' => $payment['channel'],
+                 'ip_address' => $payment['ip_address'],
+                 'split_id' => $payment['id'],
+                 'name' => $payment['name'],
+                 
+                 
+                 'authorization_code' => $payment['authorization_code'],
+                 'bin' => $payment['bin'],
+                 'last4' => $payment['last4'],
+                 'exp_month' => $payment['exp_month'],
+                 'channel' => $payment['channel'],
+                 'card_type' => $payment['card_type'],
+                 'bank' => $payment['bank'],
+                 'country_code' => $payment['country_code'],
+                 'brand' => $payment['brand'],
+                 'reusable' => $payment['reusable'],
+                 'signature' => $payment['signature'],
+                 
+                 'split_code' => $payment['split_code'],
+                 'type' => $payment['type'],
+                 'bearer_type' => $payment['bearer_type'],
+                 'bearer_subaccount' => $payment['bearer_subaccount'],
+
+                 'delivery_address' => $payment['delivery_address'],
+                'delivery_phone' => $payment['delivery_phone'],
+                'delivery_state' => $payment['delivery_state'],
+                'delivery_city' => $payment['delivery_city'],
+                'pick_station' => $payment['pick_station'],
+                 
+
+            ]);
+            
+            // $deletcart = Cart::where('user_id', $cartItems->user_id)->delete();
+
             return response()->json([
                 // 'payment' => $payment,
                 'messsage' => 'Thank You for your Patronage'

@@ -128,29 +128,29 @@ public function applyCoupon(Request $request){
 
    
 public function checkout(Request $request){
-    $getproduct_id = Cart::where('user_id', auth()->user()->id)->get();
-    // $getproduct_id = session()->get('cart', []);
-    // if(!$getproduct_id) {
-    //     return response()->json([
-    //          'error', 'Cart is empty.',
-    //     ], 404);
-    // }
-    $reference = substr(rand(0,time()),0, 9);
-
-  
+    // $getproduct_id = Cart::where('user_id', auth()->user()->id)->get();
     
+    $reference = substr(rand(0,time()),0, 9);
     try {
         // Initialize transaction on Paystack with split details
-       
         $response = Http::withToken('sk_test_2480c735552c0c451064507cb47a75d736c5c969')
             ->post('https://api.paystack.co/transaction/initialize', [
                
                 // 'user_id' => $getproduct_id->user_id,
+                'user_id' => auth()->user()->id,
                 'first_name' => auth()->user()->name,
                 'last_name' => auth()->user()->name,
                 'email' => auth()->user()->email,
                 'phone' => auth()->user()->phone,
                 'coupon_code' => $request->coupon_code,
+                'reference' => $reference,
+                // 'user_id' => $cartItems->user_id,
+                // 'product_id' => $cartItems->product_id,
+                // 'productname' => $cartItems->product_name,
+                // 'amount' => $request->amount,
+                // 'quantity' => $cartItems->quantity,
+                // 'product_colors' => $cartItems->product_colors,
+                // 'product_size' => $cartItems->product_size,
                 // 'cart_amount' => $getproduct_id->cart_amount,
 
                 // 'product_id' => $cart->product_id,
@@ -160,8 +160,6 @@ public function checkout(Request $request){
                 // 'product_size' => $getproduct_id->product_size,
                 'amount' => $request->amount,
                
-               
-             
                 'callback_url' => route('payment.callback'),  // URL to redirect after payment
                 'split' => [
                     'type' => 'percentage', // or 'flat' if you want a fixed amount
@@ -179,47 +177,53 @@ public function checkout(Request $request){
             ]);
 
             $result = json_decode($response->getBody()->getContents(), true);
-   
 
-        
-            $userId = Auth::user();
-
-           
-        $cartItems = Cart::where('user_id', auth()->user()->id)->get();
-
+       
+    $cartItems = Cart::where('user_id', auth()->user()->id)->get();
+    // $cartItems = $request->input('cart');
+    // return response()->json(['message' => $cartItems], 200);
         if ($cartItems->isEmpty()) {
             return response()->json(['message' => 'Cart is empty'], 400);
         }
-            DB::transaction(function () use ($cartItems, $userId) {
+        //     DB::transaction(function () use ($cartItems) {
                 foreach ($cartItems as $item) {
                     $order = Order::create([
+
                         'user_id' => $item->user_id,
                         'product_id' => $item->product_id,
-                        'product_name' => $item->product_name,
-                        'amount' => $item->amount,
+                        'productname' => $item->product_name,
+                        'cart_amount' => $item->amount,
+                        'amount' => $request['amount'],
+                        'delivery_address' => $request['delivery_address'],
+                        'delivery_phone' => $request['delivery_phone'],
+                        'delivery_state' => $request['delivery_state'],
+                        'delivery_city' => $request['delivery_city'],
+                        'pick_station' => $request['pick_station'],
+                        
                         'quantity' => $item->quantity,
                         'product_colors' => $item->product_colors,
                         'product_size' => $item->product_size,
-
-                        'email' => $userId['email'],
-                        'phone' => $userId['phone'],
-                        'first_name' => $userId['first_name'],
-                        'last_name' => $userId['last_name'],
-                        'user_id' => $userId['user_id'],
+                        'reference' => $reference,
+                        'email' => auth()->user()->email,
+                        'user_id' => auth()->user()->id,
+                        'first_name' => auth()->user()->name,
+                        'last_name' => auth()->user()->name,
+                        'email' => auth()->user()->email,
+                        'phone' => auth()->user()->phone,
                         'status' => 'pending',
-                        // 'images1' => $item->images1, // This is cast as JSON in the model
+                        'images1' => json_encode($item->images1), // Convert array to JSON
                     ]);
                 }
                 // Delete cart items after storing in orders
-                Cart::where('user_id', $userId)->delete();
-            });
-        
-            return response()->json(['message' => 'Order placed successfully. Cart cleared!'], 200);
-        
-        // Check if the payment initialization was successful
-        if ($order['status']) {
+            //    Cart::where('user_id', $item->user_id)->delete();
+            
+        if ($result['status']) {
             // Redirect to Paystack payment page
-            return redirect($order['data']['authorization_url']);
+            return response([
+                'message' => $result,
+            ]);
+            
+            // return redirect($result['data']['authorization_url']);
         } else {
             return back()->with('error', 'Failed to initialize payment. Please try again.');
         }
