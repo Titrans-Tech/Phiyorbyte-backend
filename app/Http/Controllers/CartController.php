@@ -46,6 +46,7 @@ class CartController extends Controller
             'product_colors' => $product->product_colors,
             'product_size' => $product->product_size,
             'amount' => $product->amount,
+            'discount' => $product->discount,
             'images1' => collect($product->images1)->map(function ($image) {
                 return asset($image);
             }),
@@ -102,6 +103,10 @@ public function applyCoupon(Request $request){
      if (!$coupon) {
          return response()->json(['message' => 'Coupon is expired or invalid'], 400);
      }
+    //  $product = Cart::find($request->user_id);
+     Cart::where('user_id', $request->user_id)->update(['coupon_id' => $request->coupon_code]);
+     
+    
     // Check if expired
     if (now()->lt($coupon->valid_from) || now()->gt($coupon->valid_to)) {
         return response()->json(['message' => 'Coupon is expired'], 400);
@@ -144,20 +149,7 @@ public function checkout(Request $request){
                 'phone' => auth()->user()->phone,
                 'coupon_code' => $request->coupon_code,
                 'reference' => $reference,
-                // 'user_id' => $cartItems->user_id,
-                // 'product_id' => $cartItems->product_id,
-                // 'productname' => $cartItems->product_name,
-                // 'amount' => $request->amount,
-                // 'quantity' => $cartItems->quantity,
-                // 'product_colors' => $cartItems->product_colors,
-                // 'product_size' => $cartItems->product_size,
-                // 'cart_amount' => $getproduct_id->cart_amount,
-
-                // 'product_id' => $cart->product_id,
-                // 'quantity' => $getproduct_id->quantity,
-                // 'product_name' => $getproduct_id->product_name,
-                // 'product_colors' => $getproduct_id->product_colors,
-                // 'product_size' => $getproduct_id->product_size,
+               
                 'amount' => $request->amount,
                
                 'callback_url' => route('payment.callback'),  // URL to redirect after payment
@@ -193,6 +185,9 @@ public function checkout(Request $request){
                         'product_id' => $item->product_id,
                         'productname' => $item->product_name,
                         'cart_amount' => $item->amount,
+                        'discount' => $item->discount,
+                        'coupon_id' => $item->coupon_id,
+
                         'amount' => $request['amount'],
                         'delivery_address' => $request['delivery_address'],
                         'delivery_phone' => $request['delivery_phone'],
@@ -215,15 +210,15 @@ public function checkout(Request $request){
                     ]);
                 }
                 // Delete cart items after storing in orders
-            //    Cart::where('user_id', $item->user_id)->delete();
+               Cart::where('user_id', $item->user_id)->delete();
             
         if ($result['status']) {
             // Redirect to Paystack payment page
-            return response([
-                'message' => $result,
-            ]);
+            // return response([
+            //     'message' => $result,
+            // ]);
             
-            // return redirect($result['data']['authorization_url']);
+            return redirect($result['data']['authorization_url']);
         } else {
             return back()->with('error', 'Failed to initialize payment. Please try again.');
         }
@@ -237,9 +232,16 @@ public function checkout(Request $request){
 
 public function mycartproducts(){
     $view_mycarts = Cart::where('user_id', auth()->user()->id)->latest()->get();
+
+    // Calculate total price
+    $totalAmount = $view_mycarts->sum(function ($cart) {
+        return $cart->amount * $cart->quantity - $cart->discount;
+    });
     
-    
-   return new CartCollection ($view_mycarts);
+    return response()->json([
+        'cart_items' => new CartCollection($view_mycarts),
+        'total_amount' => $totalAmount
+    ]);
 
  }
 

@@ -31,6 +31,7 @@ public function getquantityAttribute($value)
         'product_size',
         'product_name',
         'amount',
+        'discount',
         'coupon_id',
         'images1',
     ];
@@ -39,7 +40,7 @@ public function getquantityAttribute($value)
     protected $casts = [
         'images1' => 'array',
         'quantity' => 'integer',
-        'price' => 'decimal:2',
+        // 'price' => 'decimal:2',
     ];
     
 

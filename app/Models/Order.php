@@ -18,6 +18,8 @@ class Order extends Model
         'amount', 
         'email', 
         'phone', 
+        'discount', 
+        'coupon_id',
         
         'product_id', 
         'franchise_id', 

@@ -19,6 +19,7 @@ return new class extends Migration
             
             $table->string('product_name')->nullable();
             $table->decimal('amount', 8, 2)->nullable();
+            $table->decimal('discount', 8, 2)->nullable();
             $table->string('product_colors')->nullable();
             $table->string('product_size')->nullable();
 
