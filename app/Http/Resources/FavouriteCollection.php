@@ -19,8 +19,11 @@ class FavouriteCollection extends ResourceCollection
                 return [
                     'id' => $view_myoders->id,
 
+                    'product_id' => $view_myoders->product_id,
                     'ref_no' => $view_myoders->ref_no,
                     'product_name' => $view_myoders->product_name,
+                    'brand_name' => $view_myoders->product->brand_name,
+                    'product_id' => $view_myoders->product->id,
                     'quantity' => $view_myoders->quantity,
                     'images1' => collect($view_myoders->images1)->map(function ($image) {
                         return asset($image);

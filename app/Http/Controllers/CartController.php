@@ -38,7 +38,7 @@ class CartController extends Controller
        } else {
            // Add the product to the cart
            $cart = Cart::create([
-            'user_id' => $request->user_id,
+            'user_id' => auth()->user()->id,
             'coupon_code' => $request->coupon_code,
             'product_id' => $request->id,
             'quantity' => $request->quantity,
@@ -82,10 +82,15 @@ class CartController extends Controller
         }),
         
 
-        $total = $cart->quantity * $product->amount,
-        $subtotal = $product->discount,
-        $tot = $total - $subtotal,
-        $tot,
+        'total_amount' => $originalPrice = $cart->quantity * $product->amount,
+        'percentage_amount' => $discountPercentage = $product->discount,
+        
+        $discountAmount = ($originalPrice * $discountPercentage) / 100,
+        $discountedPrice = $originalPrice - $discountAmount,
+        'original_price' => $originalPrice,
+        'discount_percentage' => $discountPercentage,
+        'discount_amount' => $discountAmount,
+        'discounted_price' => $discountedPrice
     ], 200);
 }
     
@@ -149,7 +154,6 @@ public function checkout(Request $request){
                 'phone' => auth()->user()->phone,
                 'coupon_code' => $request->coupon_code,
                 'reference' => $reference,
-               
                 'amount' => $request->amount,
                
                 'callback_url' => route('payment.callback'),  // URL to redirect after payment
@@ -213,12 +217,12 @@ public function checkout(Request $request){
                Cart::where('user_id', $item->user_id)->delete();
             
         if ($result['status']) {
-            // Redirect to Paystack payment page
-            // return response([
-            //     'message' => $result,
-            // ]);
+            ///Redirect to Paystack payment page
+            return response([
+                'message' => $result,
+            ]);
             
-            return redirect($result['data']['authorization_url']);
+            //return redirect($result['data']['authorization_url']);
         } else {
             return back()->with('error', 'Failed to initialize payment. Please try again.');
         }

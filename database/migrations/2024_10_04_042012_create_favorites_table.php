@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('product_colors')->nullable();
             $table->string('product_size')->nullable();
 
+            $table->string('ref_no')->nullable();
+            $table->string('coupon_code')->nullable();
             $table->string('discount')->nullable();
             $table->string('quantity')->nullable();
             $table->string('images1')->nullable();

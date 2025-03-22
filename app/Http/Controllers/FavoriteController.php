@@ -5,15 +5,18 @@ namespace App\Http\Controllers;
 use App\Http\Resources\FavouriteCollection;
 use App\Models\Coupon;
 use App\Models\Favorite;
+use App\Models\Order;
 use App\Models\Product;
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 class FavoriteController extends Controller
 {
     public function addProductTofavorite(Request $request, $id)
     {
-        $cartData = $request->input('cart');
+        // $cartData = $request->input('cart');
         $product = Product::find($id);
        if(!$product) {
            return response()->json([
@@ -37,13 +40,14 @@ class FavoriteController extends Controller
             'product_size' => $product->product_size,
             'amount' => $product->amount,
             'discount' => $product->discount,
+            'ref_no' => substr(rand(0,time()),0, 9),
             'images1' => collect($product->images1)->map(function ($image) {
             return asset($image);
             }),
            ]);
            $favorite[$id] = [
-            // 'user_id' => $request->user_id,
-            'coupon_code' => $request->coupon_code,
+            'user_id' => auth()->user()->id,
+            // 'coupon_code' => $request->coupon_code,
             'product_id' => $product->id,
             'quantity' => $request->quantity,
             'product_name' => $product->product_name,
@@ -61,22 +65,29 @@ class FavoriteController extends Controller
        return response()->json([
   
         'message' => 'Product added to favorite', 
-        'images1' => collect($product->images1)->map(function ($image) {
-            return asset($image);
-         }),
+        'discount' => $product->discount,
         'amount' => $request->quantity * $product->amount,
         'quantity' => $request->quantity,
-        'product_name' => $product->product_name,
-        'product_colors' => $product->product_colors,
-        'product_size' => $product->product_size,
-        'discount' => $product->discount,
-        // 'discount' => $product->discount,
+        // 'amount' => $product->discount,
+        'product_id' => $request->product_id,
+        'categoryname' => $product->categoryname,
+        "brand_name" => $product->brand_name,
+        "product_name" => $product->product_name,
+        'images1' => collect($product->images1)->map(function ($image) {
+            return asset($image);
+        }),
         
-       // $total = $request->quantity * $product->amount,
-        // $subtotal = $request->quantity * $product->amount,
-        // $subtotal = $product->discount,
-        // $tot = $total - $subtotal,
-        // $tot,
+        'total_amount' => $originalPrice = $favorite->quantity * $product->amount,
+        'percentage_amount' => $discountPercentage = $product->discount,
+        
+        $discountAmount = ($originalPrice * $discountPercentage) / 100,
+        $discountedPrice = $originalPrice - $discountAmount,
+        'original_price' => $originalPrice,
+        'discount_percentage' => $discountPercentage,
+        'discount_amount' => $discountAmount,
+        'discounted_price' => $discountedPrice
+        
+
     ], 200);
 }
     
@@ -86,18 +97,21 @@ public function applyCoupon(Request $request){
         'coupon_code' => 'required',
     ]);
     
-    $favorite = favorite::where('user_id', $request->user_id, $request->coupon_code)->firstOrFail();
+    $favoritetotal = Favorite::where('user_id', $request->user_id)->get()
+    ->sum(fn($cart) => (int) $cart->quantity * $cart->amount);
+
+     $coupon = Coupon::where('coupon_code', $request->coupon_code)->first();
     
-    if (!$favorite) {
+    if (!$favoritetotal) {
         return response()->json([
            'message' => 'No user found' 
         ]);
     }
-    // $product = Product::find($id);
-    $coupon = Coupon::where('coupon_code', $request->coupon_code)
-        ->where('valid_from', '<=', now())
-        ->where('valid_to', '>=', now())
-        ->first();
+    // // $product = Product::find($id);
+    // $coupon = Coupon::where('coupon_code', $request->coupon_code)
+    //     ->where('valid_from', '<=', now())
+    //     ->where('valid_to', '>=', now())
+    //     ->first();
         
     if (!$coupon) {
         return response()->json([
@@ -105,65 +119,136 @@ public function applyCoupon(Request $request){
         ], 400);
     }
 
+    //  $product = Cart::find($request->user_id);
+    Favorite::where('user_id', $request->user_id)->update(['coupon_code' => $request->coupon_code]);
+     
+    
+    // Check if expired
+    if (now()->lt($coupon->valid_from) || now()->gt($coupon->valid_to)) {
+        return response()->json(['message' => 'Coupon is expired'], 400);
+    }
+
     // Attach the coupon to the favorite
     // $coupon->coupon_id = $coupon->id;
-    $coupon->save();
+    // $coupon->save();
+
+    // Calculate discount
+    $discountAmount = 0;
+    if ($coupon->type === 'fixed') {
+        $discountAmount = $coupon->discount;
+    } elseif ($coupon->type === 'percent') {
+        $discountAmount = ($favoritetotal * $coupon->discount) / 100;
+    }
+
+    
+    $newTotal = max(0, $favoritetotal - $discountAmount);
 
     return response()->json([
         'message' => 'Coupon applied successfully', 
-        'coupon' => $coupon,
-        'favorite' => $favorite,
-        // $favorite->quantity * $favorite->amount,
-        // $favorite->quantity * $favorite->amount,
-        // $subtotal = $favorite->quantity * $favorite->amount,
-        // $subtotal = $coupon->discount / $subtotal * 100,
-        // $tot = $total - $subtotal,
-        // $tot,
+        'coupon' => $coupon->coupon_code,
+        'original_total' => number_format($favoritetotal, 2),
+        'discount' => number_format($discountAmount, 2),
+        'new_total' => number_format($newTotal, 2),
+        
     ],200);
 }
 
    
-public function checkout(Request $request)
-    {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            // 'payment_method' => 'required|string'
-        ]);
+public function checkout(Request $request){
+      
+    $reference = substr(rand(0,time()),0, 9);
+    try {
+        // Initialize transaction on Paystack with split details
+        $response = Http::withToken('sk_test_2480c735552c0c451064507cb47a75d736c5c969')
+            ->post('https://api.paystack.co/transaction/initialize', [
+               
+                // 'user_id' => $getproduct_id->user_id,
+                'user_id' => auth()->user()->id,
+                'first_name' => auth()->user()->name,
+                'last_name' => auth()->user()->name,
+                'email' => auth()->user()->email,
+                'phone' => auth()->user()->phone,
+                // 'coupon_code' => $request->coupon_code,
+                'reference' => $reference,
+               
+                'amount' => $request->amount,
+               
+                'callback_url' => route('payment.callback'),  // URL to redirect after payment
+                'split' => [
+                    'type' => 'percentage', // or 'flat' if you want a fixed amount
+                    'subaccounts' => [
+                        [
+                            'subaccount' => 'ACCT_ydm5cjexrm0d88c', 
+                            'share' => 50  
+                        ],
+                        [
+                            'subaccount' => 'ACCT_whkl6chr1tbvy8j',
+                            'share' => 50  
+                        ]
+                    ]
+                ]
+            ]);
 
-        // Get the favorite
-        $favorite = favorite::where('user_id', $request->user_id)->firstOrFail();
-        if (!$favorite) {
-            return response()->json(['message' => 'Cart not found'], 404);
+            $result = json_decode($response->getBody()->getContents(), true);
+
+       
+    $cartItems = Favorite::where('user_id', auth()->user()->id)->get();
+    // $cartItems = $request->input('cart');
+    // return response()->json(['message' => $cartItems], 200);
+        if ($cartItems->isEmpty()) {
+            return response()->json(['message' => 'Cart is empty'], 400);
         }
-        $total = 0;
+        //     DB::transaction(function () use ($cartItems) {
+                foreach ($cartItems as $item) {
+                    $order = Order::create([
 
-        foreach ($favorite->quantity as $item) {
-            $total += $item->quantity * $item->favarite->amount;
+                        'user_id' => $item->user_id,
+                        'product_id' => $item->product_id,
+                        'productname' => $item->product_name,
+                        'cart_amount' => $item->amount,
+                        'discount' => $item->discount,
+                        'coupon_id' => $item->coupon_id,
+
+                        'amount' => $request['amount'],
+                        'delivery_address' => $request['delivery_address'],
+                        'delivery_phone' => $request['delivery_phone'],
+                        'delivery_state' => $request['delivery_state'],
+                        'delivery_city' => $request['delivery_city'],
+                        'pick_station' => $request['pick_station'],
+                        
+                        'quantity' => $item->quantity,
+                        'product_colors' => $item->product_colors,
+                        'product_size' => $item->product_size,
+                        'reference' => $reference,
+                        'email' => auth()->user()->email,
+                        'user_id' => auth()->user()->id,
+                        'first_name' => auth()->user()->name,
+                        'last_name' => auth()->user()->name,
+                        'email' => auth()->user()->email,
+                        'phone' => auth()->user()->phone,
+                        'status' => 'pending',
+                        'images1' => json_encode($item->images1), // Convert array to JSON
+                    ]);
+                }
+                // Delete cart items after storing in orders
+               Favorite::where('user_id', $item->user_id)->delete();
+            
+        if ($result['status']) {
+            ///Redirect to Paystack payment page
+            return response([
+                'message' => $result,
+            ]);
+            
+            //return redirect($result['data']['authorization_url']);
+        } else {
+            return back()->with('error', 'Failed to initialize payment. Please try again.');
         }
+    } 
 
-        if ($favorite->coupon) {
-            if ($favorite->coupon->type === 'fixed') {
-                $total -= $favorite->coupon->discount;
-            } elseif ($favorite->coupon->type === 'percent') {
-                $total -= ($total * ($favorite->coupon->discount / 100));
-            }
-
-            // Update the coupon usage count
-            $favorite->coupon->increment('used_count');
-        }
-
-        // Process the payment here (e.g., using Stripe, PayPal, etc.)
-        // After successful payment:
-        
-        // Clear the favorite
-        $favorite->items()->delete();
-        $favorite->delete();
-
-        return response()->json([
-            'message' => 'Checkout successful', 
-            'total_paid' => $total
-        ], 200);
+    catch (RequestException $e) {
+        throw $e; 
     }
+}    
 
 
     public function myfavourites(){

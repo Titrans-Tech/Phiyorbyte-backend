@@ -149,7 +149,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
   Route::post('/favorite/addfavorite/{id}', [FavoriteController::class, 'addProductTofavorite']);
   Route::post('/favorite/addcoupon', [FavoriteController::class, 'applyCoupon']);
-  Route::post('/favorite/addcheckout2', [FavoriteController::class, 'checkouto']);
+  Route::post('/favorite/addcheckout', [FavoriteController::class, 'checkout']);
 });
 
 
