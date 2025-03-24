@@ -171,7 +171,7 @@ public function checkout(Request $request){
                 // 'coupon_code' => $request->coupon_code,
                 'reference' => $reference,
                
-                'amount' => $request->amount,
+                'amount' => $request->amount * 100, // Amount in kobo
                
                 'callback_url' => route('payment.callback'),  // URL to redirect after payment
                 'split' => [
@@ -209,7 +209,7 @@ public function checkout(Request $request){
                         'discount' => $item->discount,
                         'coupon_id' => $item->coupon_id,
 
-                        'amount' => $request['amount'],
+                        'amount' => $request['amount'] * 100, // Amount in kobo
                         'delivery_address' => $request['delivery_address'],
                         'delivery_phone' => $request['delivery_phone'],
                         'delivery_state' => $request['delivery_state'],
@@ -231,7 +231,7 @@ public function checkout(Request $request){
                     ]);
                 }
                 // Delete cart items after storing in orders
-               Favorite::where('user_id', $item->user_id)->delete();
+               
             
         if ($result['status']) {
             ///Redirect to Paystack payment page

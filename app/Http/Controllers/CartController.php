@@ -131,7 +131,7 @@ public function applyCoupon(Request $request){
     return response()->json([
         'original_total' => number_format($cartTotal, 2),
         'discount' => number_format($discountAmount, 2),
-        'new_total' => number_format($newTotal, 2),
+        'new_total' => number_format($newTotal * 100, 2),
         'message' => 'Coupon applied successfully!',
     ]);
 }
@@ -154,7 +154,8 @@ public function checkout(Request $request){
                 'phone' => auth()->user()->phone,
                 'coupon_code' => $request->coupon_code,
                 'reference' => $reference,
-                'amount' => $request->amount,
+                'amount' => $request->amount * 100, // Amount in kobo
+                'currency' => 'NGN', // Currency code
                
                 'callback_url' => route('payment.callback'),  // URL to redirect after payment
                 'split' => [
@@ -192,7 +193,7 @@ public function checkout(Request $request){
                         'discount' => $item->discount,
                         'coupon_id' => $item->coupon_id,
 
-                        'amount' => $request['amount'],
+                        'amount' => $request['amount'] * 100,
                         'delivery_address' => $request['delivery_address'],
                         'delivery_phone' => $request['delivery_phone'],
                         'delivery_state' => $request['delivery_state'],
@@ -214,7 +215,7 @@ public function checkout(Request $request){
                     ]);
                 }
                 // Delete cart items after storing in orders
-               Cart::where('user_id', $item->user_id)->delete();
+            //    Cart::where('user_id', $item->user_id)->delete();
             
         if ($result['status']) {
             ///Redirect to Paystack payment page

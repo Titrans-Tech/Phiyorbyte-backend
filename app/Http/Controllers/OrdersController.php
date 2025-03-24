@@ -6,6 +6,7 @@ use App\Http\Resources\OrderResource;
 use App\Http\Resources\OrdersCollection;
 use App\Http\Resources\OrdersResource;
 use App\Models\Cart;
+use App\Models\Favorite;
 use App\Models\Order;
 use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
@@ -36,10 +37,8 @@ class OrdersController extends Controller
 
          $reference = $request->query('reference');
          if ($result['status'] && $result['status'] == 'success') {
-         $payment = Order::where('reference', $reference)->first();
-            //  return response([
-            //     'message' => $result,
-            //  ]);
+            $payment = Order::where('reference', $reference)->first();
+
             
             $payment->update([
                  'status' => 'success',
@@ -72,33 +71,7 @@ class OrdersController extends Controller
                  'bearer_type' => $result['data']['split']['formula']['bearer_type'],
                  'bearer_subaccount' => $result['data']['split']['formula']['bearer_subaccount'],
                  
-                 
-                 
-                 // 'original_share' => $result['data']['split']['formula']['subaccounts']['original_share'],
-                 // 'split_fees' => $result['data']['split']['formula']['subaccounts']['fees'],
-             // 'share' => ['split']['formula']['subaccounts']['share'],
-             // 'original_share' => ['split']['formula']['subaccounts']['original_share'],
-             // 'subaccount_code' => ['split']['formula']['subaccounts']['subaccount_code'],
-             // 'subaccount_id' => ['split']['formula']['subaccounts']['id'],
-             // 'subaccount_name' => ['split']['formula']['subaccounts']['name'],
-             // 'integration' => ['split']['formula']['subaccounts']['integration'],
-             
-
-             // 'paystack' => ['split']['shares']['paystack'],
-             // 'subaccount_amount' => ['split']['shares']['subaccounts']['amount'],
-             // 'original_share' => ['split']['shares']['subaccounts']['original_share'],
-             // 'shere_fees' => ['split']['shares']['subaccounts']['shere_fees'],
-             // 'shere_subaccount_code' => ['split']['shares']['subaccounts']['subaccount_code'],
-             // 'shere_id' => ['split']['shares']['subaccounts']['id'],
-             // 'share_integration' => ['split']['shares']['subaccounts']['integration'],
-
-                
-            ]);
-            
-            // dd($result);
-            Order::where('user_id', $payment->user_id)->update([
-                'status' => 'success',
-                'domain' => $payment['domain'],
+                 'domain' => $payment['domain'],
                  'requested_amount' => $payment['requested_amount'],
                  'paidAt' => $payment['paidAt'],
                  'gateway_response' => $payment['gateway_response'],
@@ -110,6 +83,7 @@ class OrdersController extends Controller
                  'name' => $payment['name'],
                  
                  
+
                  'authorization_code' => $payment['authorization_code'],
                  'bin' => $payment['bin'],
                  'last4' => $payment['last4'],
@@ -133,30 +107,67 @@ class OrdersController extends Controller
                 'delivery_city' => $payment['delivery_city'],
                 'pick_station' => $payment['pick_station'],
                  
+                 // 'original_share' => $result['data']['split']['formula']['subaccounts']['original_share'],
+                 // 'split_fees' => $result['data']['split']['formula']['subaccounts']['fees'],
+             // 'share' => ['split']['formula']['subaccounts']['share'],
+             // 'original_share' => ['split']['formula']['subaccounts']['original_share'],
+             // 'subaccount_code' => ['split']['formula']['subaccounts']['subaccount_code'],
+             // 'subaccount_id' => ['split']['formula']['subaccounts']['id'],
+             // 'subaccount_name' => ['split']['formula']['subaccounts']['name'],
+             // 'integration' => ['split']['formula']['subaccounts']['integration'],
+             
 
+             // 'paystack' => ['split']['shares']['paystack'],
+             // 'subaccount_amount' => ['split']['shares']['subaccounts']['amount'],
+             // 'original_share' => ['split']['shares']['subaccounts']['original_share'],
+             // 'shere_fees' => ['split']['shares']['subaccounts']['shere_fees'],
+             // 'shere_subaccount_code' => ['split']['shares']['subaccounts']['subaccount_code'],
+             // 'shere_id' => ['split']['shares']['subaccounts']['id'],
+             // 'share_integration' => ['split']['shares']['subaccounts']['integration'],
+
+                
             ]);
             
-            // $deletcart = Cart::where('user_id', $cartItems->user_id)->delete();
-
+            // $cartItems = Cart::where('user_id', auth()->user()->id)->get();
+            Cart::where('user_id', $payment->user_id)->delete();
+            Favorite::where('user_id', $payment->user_id)->delete();
             return response()->json([
-                // 'payment' => $payment,
                 'messsage' => 'Thank You for your Patronage'
             ]);
-            //return redirect()->route('pages.thankyou')->with('success', 'Thank You for your Patronage');
-         //    return redirect()->route('payment.success')->with('success', 'Payment successful!');
+
+            
+            
+            return redirect()->back()->with('success', 'Thank You for your Patronage');
+         //return redirect()->route('payment.success')->with('success', 'Payment successful!');
          } else {
-            return response()->json([
-                'messsage' => 'Payment Failed'
+            $payment = Order::where('reference', $reference)->first();
+            $payment->update([
+                'status' => 'pending',
+                'domain' => $result['data']['domain'],
+                'requested_amount' => $result['data']['requested_amount'],
+                'paidAt' => $result['data']['paidAt'],
+                'gateway_response' => $result['data']['gateway_response'],
+                'channel' => $result['data']['channel'],
+                'ip_address' => $result['data']['ip_address'],
+                'channel' => $result['data']['channel'],
+                'ip_address' => $result['data']['ip_address'],
+                'split_id' => $result['data']['split']['id'],
+                'name' => $result['data']['split']['name'],
+                
             ]);
-            //return redirect()->route('payment.failed')->with('error', 'Payment failed. Please try again.');
+            // return response()->json([
+            //     'messsage' => 'Payment Failed'
+            // ]);
+
+           return redirect()->back()->with('error', 'Payment failed. Please try again.');
          }
      } catch (RequestException $e) {
         return response()->json([
             'messsage' => 'Payment Failed'
         ]);
-        // return redirect()->route('payment.failed')->with('error', 'An error occurred. Please try again.');
+        return redirect()->back()->with('error', 'An error occurred. Please try again.');
      }
-
+        // Handle the response from Paystack
      throw $e; // or handle the error as needed
 
  }
@@ -199,3 +210,34 @@ return new OrdersCollection ($view_myproducts);
  
  
 }
+
+
+
+// public function handleWebhook(Request $request)
+// {
+//     $payload = $request->all();
+
+//     // Verify Paystack Signature
+//     $secretKey = env('PAYSTACK_SECRET_KEY');
+//     $computedHash = hash_hmac('sha512', $request->getContent(), $secretKey);
+//     if ($computedHash !== $request->header('X-Paystack-Signature')) {
+//         return response()->json(['message' => 'Invalid signature'], 400);
+//     }
+
+//     if ($payload['event'] === 'charge.success') {
+//         $data = $payload['data'];
+
+//         // Process payment and store transaction in database
+//         Transaction::create([
+//             'user_id' => $data['metadata']['user_id'] ?? null,
+//             'reference' => $data['reference'],
+//             'amount' => $data['amount'] / 100, // Convert kobo to Naira
+//             'status' => 'success',
+//             'payment_method' => $data['channel'],
+//         ]);
+//     }
+
+//     return response()->json(['message' => 'Webhook processed'], 200);
+// }
+// Route::post('/api/paystack/webhook', [PaystackWebhookController::class, 'handleWebhook']);
+// https://api.example.com/api/paystack/webhook
